@@ -1,24 +1,34 @@
-const mongoose = require("mongoose");
-const { model, Types } = require("mongoose");
+const { Schema, model } = require("mongoose");
 
-const userSchema = mongoose.Schema({
+const userSchema = new Schema({
   name: {
     type: String,
+    maxLength: 50,
     required: true,
     unique: true,
-    trim: true,
-    maxlength: 15,
   },
-  email: { type: String, required: true, unique: true, trim: true },
-  password: { type: String, required: true, minlength: 4 },
-  role: { type: Number, default: 0 },
-  image: [{ originalname: { type: String }, filename: { type: String } }],
+  email: {
+    type: String,
+    trim: true,
+    unique: true,
+    required: true,
+  },
+  password: {
+    type: String,
+    minLength: 4,
+    required: true,
+  },
+  role: {
+    type: Number,
+    default: 0,
+  },
+  image: {
+    // single image so {} without []
+    filename: { type: String, default: "noimage.jpg" },
+    originalname: { type: String, default: "noimage.jpg" },
+  },
   createdAt: Date,
   authProvider: String,
-  like: {
-    type: Types.ObjectId,
-    ref: "like",
-  },
 });
 const User = model("user", userSchema);
 module.exports = User;
