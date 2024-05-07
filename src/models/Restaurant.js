@@ -1,4 +1,5 @@
-import mongoose, { Types } from "mongoose";
+const mongoose = require("mongoose");
+const { Types } = require("mongoose");
 
 const restaurantSchema = mongoose.Schema({
   name: { type: String, required: true },

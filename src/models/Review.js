@@ -1,4 +1,4 @@
-import mongoose, { model, Types } from "mongoose";
+const { mongoose, Types } = require("mongoose");
 
 const reviewSchema = mongoose.Schema({
   title: { type: String, required: true },
@@ -10,5 +10,5 @@ const reviewSchema = mongoose.Schema({
   user: { type: Types.ObjectId, ref: "User" },
   restaurant: { type: Types.ObjectId, ref: "Restaurant" },
 });
-const Review = model("review", reviewSchema);
+const Review = mongoose.model("review", reviewSchema);
 module.exports = Review;

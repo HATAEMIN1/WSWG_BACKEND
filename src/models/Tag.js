@@ -1,4 +1,4 @@
-import mongoose, { model, Types } from "mongoose";
+const { mongoose, Types } = require("mongoose");
 
 const TagSchema = mongoose.Schema({
   name: String,
@@ -7,5 +7,5 @@ const TagSchema = mongoose.Schema({
     ref: "Review",
   },
 });
-const Tag = model("tag", TagSchema);
+const Tag = mongoose.model("tag", TagSchema);
 module.exports = Tag;

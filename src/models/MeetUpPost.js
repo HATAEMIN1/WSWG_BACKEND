@@ -1,4 +1,4 @@
-import mongoose, { model } from "mongoose";
+const mongoose = require("mongoose");
 
 const meetUpPostSchema = mongoose.Schema({
   title: { type: String, required: true },
@@ -9,5 +9,5 @@ const meetUpPostSchema = mongoose.Schema({
   chatLink: { type: String, required: true, unique: true },
   createdAt: Date,
 });
-const MeetUpPost = model("meetUpPost", meetUpPostSchema);
+const MeetUpPost = mongoose.model("meetUpPost", meetUpPostSchema);
 module.exports = MeetUpPost;
