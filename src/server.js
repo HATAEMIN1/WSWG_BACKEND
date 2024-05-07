@@ -15,8 +15,8 @@ const server = async () => {
     console.log("mongoDB connected");
     mongoose.set("debug", true);
     app.use("/user", userRouter);
-    app.listen(4001, async function () {
-      console.log("server on port 4001");
+    app.listen(4000, async function () {
+      console.log("server on port 4000");
     });
   } catch (error) {
     console.log("error connecting to the server", error);
