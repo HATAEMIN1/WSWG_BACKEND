@@ -15,7 +15,7 @@ const server = async () => {
     await mongoose.connect(process.env.MONGO_URL);
     console.log("mongoDB connected");
     mongoose.set("debug", true);
-    app.use("/user", userRouter);
+    app.use("/users", userRouter);
     app.use("/meet-posts", meetUpPostRouter);
     app.listen(4000, async function () {
       console.log("server on port 4000");
