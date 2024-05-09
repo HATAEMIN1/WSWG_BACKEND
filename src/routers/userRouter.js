@@ -24,50 +24,56 @@ userRouter.post("/register", async (req, res) => {
 
 userRouter.get("/kakao-login", async (req, res) => {
   // 인가코드
-  let authCode = req.query.code;
-  console.log("req.query.code = authCode:", authCode);
-  axios
-    .post("https://kauth.kakao.com/oauth/token", null, {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      params: {
-        grant_type: "authorization_code",
-        client_id: process.env.REST_API_KEY,
-        redirect_uri: process.env.REDIRECT_URI, // 카카오 로그인 한 후 인가코드 authCode 받는 용도 -> 인가코드로 access token을 받고 이 access token으로 카카오 유저 정보를 받는다
-        code: authCode, // 카카오 서버에서 redirect uri로 인가코드를 보낼때, url 속에 query문으로 담아서 보내줌. 이를 받아서 다시 쓰는 것
-      },
-    })
-    .then((response) => {
-      console.log("response.data", response.data);
-      console.log("access token:", response.data.access_token);
-      // 카카오에서 access token과 refresh token 가져오기
-      let { accessToken, refreshToken } = response.data;
-      // accessToken 저장하기
-      localStorage.setItem("accessToken", accessToken);
-      // refreshToken 저장하기
-      localStorage.setItem("refreshToken", refreshToken);
+  try {
+    let authCode = req.query.code;
+    axios
+      .post("https://kauth.kakao.com/oauth/token", null, {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        params: {
+          grant_type: "authorization_code",
+          client_id: process.env.REST_API_KEY,
+          redirect_uri: process.env.REDIRECT_URI, // 카카오 로그인 한 후 인가코드 authCode 받는 용도 -> 인가코드로 access token을 받고 이 access token으로 카카오 유저 정보를 받는다
+          code: authCode, // 카카오 서버에서 redirect uri로 인가코드를 보낼때, url 속에 query문으로 담아서 보내줌. 이를 받아서 다시 쓰는 것
+        },
+      })
+      .then((response) => {
+        console.log("response.data", response.data);
+        // use jwt decode
+        // console.log("access token:", response.data.access_token);
+        // 카카오에서 access token과 refresh token 가져오기
+        // let { accessToken, refreshToken } = response.data;
+        // console.log("accessToken", accessToken);
+        // console.log("refreshToken", refreshToken);
+        // accessToken 저장하기
+        // localStorage.setItem("accessToken", accessToken);
+        // refreshToken 저장하기
+        // localStorage.setItem("refreshToken", refreshToken);
 
-      // 카카오에서 가져온 access token으로 유저 정보 가져오기
-      axios
-        .get("https://kapi.kakao.com/v2/user/me", {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
-          },
-        })
-        .then((response) => {
-          console.log("kakao user data retrieved:", response.data);
-          // create user if user does not exist in db
-          // or make user logged in here?'
-          // 가져온 유저 정보를 db와 session에 저장해야한다
-          // 가져온 유저 정보(이름/아이디)로 이메일과 비번을 억지로 만들어서 (백에서만 유저는 프론트에서 이걸 못봄) 회원가입과 로그인까지 해준다.
-          // 유저 프로필 사진이랑 닉네임/이름 밖에 카카오에서 못가져오고 이메일을 못가져와서 만들어줘야한다 백에서만
-        });
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+        // 카카오에서 가져온 access token으로 유저 정보 가져오기
+        // axios
+        //   .get("https://kapi.kakao.com/v2/user/me", {
+        //     headers: {
+        //       Authorization: `Bearer ${accessToken}`,
+        //       "Content-type": "application/x-www-form-urlencoded;charset=utf-8",
+        //     },
+        //   })
+        //   .then((response) => {
+        //     console.log("kakao user data retrieved:", response.data);
+        //     res.status(200).send(response.data);
+        //     // create user if user does not exist in db
+        //     // or make user logged in here?'
+        //     // 가져온 유저 정보를 db와 session에 저장해야한다
+        //     // 가져온 유저 정보(이름/아이디)로 이메일과 비번을 억지로 만들어서 (백에서만 유저는 프론트에서 이걸 못봄) 회원가입과 로그인까지 해준다.
+        //     // 유저 프로필 사진이랑 닉네임/이름 밖에 카카오에서 못가져오고 이메일을 못가져와서 만들어줘야한다 백에서만
+        //   });
+        // res.status(200).send({ authCode });
+      });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send({ error });
+  }
 });
 
 userRouter.post("/login", async (req, res) => {

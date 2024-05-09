@@ -6,7 +6,6 @@ const mongoose = require("mongoose");
 const { userRouter } = require("./routers/userRouter");
 const meetUpPostRouter = require("./routers/meetUpPostRouter");
 
-
 dotenv.config();
 app.use(express.json());
 app.use(cors());
@@ -17,7 +16,7 @@ const server = async () => {
     console.log("mongoDB connected");
     mongoose.set("debug", true);
     app.use("/users", userRouter);
-    app.use("/restaurants", restaurantRouter);
+    // app.use("/restaurants", restaurantRouter);
     app.use("/meet-posts", meetUpPostRouter);
     app.listen(4000, async function () {
       console.log("server on port 4000");
