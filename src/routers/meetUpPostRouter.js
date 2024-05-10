@@ -41,4 +41,17 @@ meetUpPostRouter.get("/:mpId", async (req, res) => {
     res.status(500).send({ error: error.message });
   }
 });
+
+meetUpPostRouter.delete("/:mpId", async (req, res) => {
+  try {
+    const { mpId } = req.params;
+    const deletedMeetUpPost = await MeetUpPost.findByIdAndDelete(mpId);
+
+    if (!deletedMeetUpPost)
+      return res.status(400).send({ message: "mpId is 없음" });
+    return res.status(200).send({ message: "우리지금만나가 삭제되었습니다." });
+  } catch (error) {
+    return res.status(400).send({ error: error.message });
+  }
+});
 module.exports = meetUpPostRouter;
