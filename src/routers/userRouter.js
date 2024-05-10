@@ -23,28 +23,11 @@ userRouter.post("/register", async (req, res) => {
   } catch (error) {}
 });
 
-userRouter.get("/kakao-login", async (req, res) => {
-  // 인가코드
+userRouter.post("/kakao-login", async (req, res) => {
+  // id_token 프론트에서 받기
   try {
-    let authCode = req.query.code;
-    const response = await axios.post(
-      "https://kauth.kakao.com/oauth/token",
-      null,
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        params: {
-          grant_type: "authorization_code",
-          client_id: process.env.REST_API_KEY,
-          redirect_uri: process.env.REDIRECT_URI, // 카카오 로그인 한 후 인가코드 authCode 받는 용도 -> 인가코드로 access token을 받고 이 access token으로 카카오 유저 정보를 받는다
-          code: authCode, // 카카오 서버에서 redirect uri로 인가코드를 보낼때, url 속에 query문으로 담아서 보내줌. 이를 받아서 다시 쓰는 것
-        },
-      }
-    );
-
-    console.log("response.data", response.data);
-    const decoded = jwtDecode(response.data.id_token);
+    console.log("req.body", req.body);
+    const decoded = jwtDecode(req.body.id_token);
     console.log("decoded", decoded);
     const username = decoded.nickname;
     const profilePic = decoded.picture;
