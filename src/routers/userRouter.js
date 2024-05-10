@@ -52,7 +52,7 @@ userRouter.post("/kakao-login", async (req, res) => {
 
       return res
         .status(200)
-        .send({ existingUser, accessToken, message: "로그인성공" });
+        .send({ existingUser, accessToken, message: "로그인 성공" });
     } else {
       // i,e, if user with the mail does not already exist, then sign up user
       const newUser = await new User({
@@ -66,10 +66,82 @@ userRouter.post("/kakao-login", async (req, res) => {
         },
         createdAt: new Date(),
       }).save();
-      res.status(200).send({ newUser });
+      res.status(200).send({ newUser, message: "회원가입 성공" });
     }
   } catch (error) {
     console.error(error.message);
+    res.status(500).send({ error });
+  }
+});
+
+userRouter.post("/naver-login", async (req, res) => {
+  try {
+    const response = await axios.post(
+      "https://nid.naver.com/oauth2.0/token",
+      null,
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        params: {
+          grant_type: "authorization_code",
+          client_id: process.env.REACT_APP_NAVER_CLIENT_ID,
+          client_secret: process.env.REACT_APP_NAVER_CLIENT_SECRET,
+          redirect_uri: process.env.REACT_APP_NAVER_REDIRECT_URI,
+          code: req.body.code,
+        },
+      }
+    );
+    console.log("response.data", response.data);
+    const userDataResponse = await axios.post(
+      "https://openapi.naver.com/v1/nid/me",
+      null,
+      {
+        headers: {
+          Authorization: `Bearer ${response.data.access_token}`,
+        },
+      }
+    );
+    console.log(
+      "userDataResponse.data.response",
+      userDataResponse.data.response
+    );
+    const userData = userDataResponse.data.response;
+
+    const username = userData.nickname;
+    const profilePic = userData.profile_image;
+    const email = userData.email;
+    const password = await hash(email, 10);
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      const payload = {
+        userId: existingUser._id.toHexString(),
+        email: existingUser.email,
+        role: existingUser.role,
+      };
+
+      const accessToken = jwt.sign(payload, process.env.SECRET_KEY, {
+        expiresIn: "1h",
+      });
+
+      return res
+        .status(200)
+        .send({ existingUser, accessToken, message: "로그인 성공" });
+    } else {
+      const newUser = await new User({
+        name: username,
+        email,
+        password,
+        image: {
+          filename: `profilePic-${username}.jpg`,
+          originalname: profilePic,
+        },
+        createdAt: new Date(),
+      }).save();
+      res.status(200).send({ newUser, message: "회원가입 성공" });
+    }
+  } catch (error) {
     res.status(500).send({ error });
   }
 });
