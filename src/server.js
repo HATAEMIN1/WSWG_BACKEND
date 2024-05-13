@@ -18,7 +18,7 @@ const server = async () => {
     console.log("mongoDB connected");
     mongoose.set("debug", true);
     app.use("/users", userRouter);
-    // app.use("/restaurants", restaurantRouter);
+    app.use("/restaurants", restaurantRouter);
     app.use("/meet-posts", meetUpPostRouter);
     app.use("/meet-posts/:mpId/comments", meetUpPostCommentRouter);
     app.listen(4000, async function () {
