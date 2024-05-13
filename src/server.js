@@ -6,7 +6,8 @@ const mongoose = require("mongoose");
 const { userRouter } = require("./routers/userRouter");
 const meetUpPostRouter = require("./routers/meetUpPostRouter");
 const restaurantRouter = require("./routers/restaurantRouter");
-const meetUpPostCommentRouter = require("./routers/meetUpPostCommentRouter");
+
+
 
 dotenv.config();
 app.use(express.json());
