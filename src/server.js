@@ -5,7 +5,7 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const { userRouter } = require("./routers/userRouter");
 const meetUpPostRouter = require("./routers/meetUpPostRouter");
-
+const restaurantRouter = require("./routers/restaurantRouter");
 
 dotenv.config();
 app.use(express.json());
