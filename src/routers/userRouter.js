@@ -44,10 +44,11 @@ userRouter.post("/kakao-login", async (req, res) => {
         userId: existingUser._id.toHexString(),
         email: existingUser.email,
         role: existingUser.role,
+        image: { ...existingUser.image, originalname: profilePic },
       };
 
       const accessToken = jwt.sign(payload, process.env.SECRET_KEY, {
-        expiresIn: "1h",
+        expiresIn: "7d", // 일주일 뒤 토큰 만료
       });
 
       return res
@@ -119,10 +120,11 @@ userRouter.post("/naver-login", async (req, res) => {
         userId: existingUser._id.toHexString(),
         email: existingUser.email,
         role: existingUser.role,
+        image: { ...existingUser.image, originalname: profilePic },
       };
 
       const accessToken = jwt.sign(payload, process.env.SECRET_KEY, {
-        expiresIn: "1h",
+        expiresIn: "7d",
       });
 
       return res
@@ -165,10 +167,11 @@ userRouter.post("/login", async (req, res) => {
       userId: user._id.toHexString(),
       email: user.email,
       role: user.role,
+      image: user.image,
     };
 
     const accessToken = jwt.sign(payload, process.env.SECRET_KEY, {
-      expiresIn: "1h",
+      expiresIn: "7d",
     });
 
     return res.status(200).send({ user, accessToken, message: "로그인성공" });
