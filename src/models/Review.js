@@ -2,7 +2,7 @@ const { mongoose, Types } = require("mongoose");
 
 const reviewSchema = mongoose.Schema({
   content: { type: String, required: true },
-  views: { type: Number },
+
   image: [{ type: String }],
   rating: { type: Number, required: true },
   createdAt: Date,
