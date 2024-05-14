@@ -8,28 +8,28 @@ meetUpPostRouter.post("/", async (req, res) => {
   try {
     const { title, content, latitude, longitude, chatLink, userId } = req.body;
 
-    if (typeof title !== "string") {
-      return res.status(400).send({ err: "title is required" });
-    }
-    if (typeof content !== "string") {
-      return res.status(400).send({ err: "content is required" });
-    }
-    if (typeof latitude !== "number") {
-      return res.status(400).send({ err: "latitude is required" });
-    }
-    if (typeof longitude !== "number") {
-      return res.status(400).send({ err: "longitude is required" });
-    }
-    if (typeof chatLink !== "string") {
-      return res.status(400).send({ err: "chatlink is required" });
-    }
+    // if (typeof title !== "string") {
+    //   return res.status(400).send({ err: "title is required" });
+    // }
+    // if (typeof content !== "string") {
+    //   return res.status(400).send({ err: "content is required" });
+    // }
+    // if (typeof latitude !== "number") {
+    //   return res.status(400).send({ err: "latitude is required" });
+    // }
+    // if (typeof longitude !== "number") {
+    //   return res.status(400).send({ err: "longitude is required" });
+    // }
+    // if (typeof chatLink !== "string") {
+    //   return res.status(400).send({ err: "chatlink is required" });
+    // }
     if (!mongoose.isValidObjectId(userId)) {
-      return res.status(400).send({ err: "userId is required" });
+      return res.status(401).send({ err: "userId is required" });
     }
 
     let user = await User.findById(userId);
     if (!user) {
-      return res.status(400).send({ err: "user does not exist" });
+      return res.status(402).send({ err: "user does not exist" });
     }
 
     let meetUpPost = await new MeetUpPost({ ...req.body, user }).save();
