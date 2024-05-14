@@ -35,5 +35,21 @@ restaurantRouter.get("/:cateId/:rtId", async (req, res) => {
     res.status(500).send({ error: e.message });
   }
 });
+restaurantRouter.post("/:cateId/:userId/:rtId", async (req, res) => {
+  try {
+    let visitedPages = {};
+    const { userId, rtId } = req.params;
+    const restaurant = await Restaurant.findById(rtId);
+    restaurant.views++;
+    restaurant.save();
+    if (!visitedPages[userId]) {
+      visitedPages[userId] = {};
+    }
+    console.log(restaurant.views);
+    res.status(200).send({ restaurant });
+  } catch (e) {
+    res.status(500).send({ error: e.message });
+  }
+});
 
 module.exports = restaurantRouter;
