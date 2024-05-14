@@ -7,6 +7,7 @@ const { userRouter } = require("./routers/userRouter");
 const meetUpPostRouter = require("./routers/meetUpPostRouter");
 const restaurantRouter = require("./routers/restaurantRouter");
 const meetUpPostCommentRouter = require("./routers/meetUpPostCommentRouter");
+const reviewRouter = require("./routers/reviewRouter");
 
 dotenv.config();
 app.use(express.json());
@@ -20,6 +21,8 @@ const server = async () => {
     app.use("/users", userRouter);
     app.use("/restaurants", restaurantRouter);
     app.use("/meet-posts", meetUpPostRouter);
+    app.use("/review-posts", reviewRouter);
+
     app.use("/meet-posts/:mpId/comments", meetUpPostCommentRouter);
     app.listen(4000, async function () {
       console.log("server on port 4000");
