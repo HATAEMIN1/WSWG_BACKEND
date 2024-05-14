@@ -13,21 +13,17 @@ reviewRouter.post("/", async (req, res) => {
 
     let user = await User.findById(userId);
     let restaurant = await Restaurant.findById(restId);
-
     const review = await new Review({ ...req.body, user, restaurant }).save();
-    console.log(review);
     return res.status(200).send({ review });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: error.message });
   }
 });
-
 //리뷰 리스트
 reviewRouter.get("/", async (req, res) => {
   try {
-    const review = await Review.find({});
-
+    const review = await Review.find({}).populate("user", "name");
     return res.status(200).send({ review });
   } catch (error) {
     res.status(500).send({ error: error.message });
