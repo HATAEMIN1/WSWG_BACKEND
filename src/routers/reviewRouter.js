@@ -10,9 +10,8 @@ const Review = require("../models/Review");
 reviewRouter.post("/", async (req, res) => {
   try {
     const { content, rating, userId, restId } = req.body;
-
-    let user = await User.findById(userId);
-    let restaurant = await Restaurant.findById(restId);
+    const user = await User.findById(userId);
+    const restaurant = await Restaurant.findById(restId);
 
     const review = await new Review({ ...req.body, user, restaurant }).save();
     return res.status(200).send({ review });
@@ -24,22 +23,21 @@ reviewRouter.post("/", async (req, res) => {
 //리뷰 리스트
 reviewRouter.get("/", async (req, res) => {
   try {
-    const review = await Review.find({}).populate("user", "name");
-    return res.status(200).send({ review });
+    const limit = req.query.limit ? Number(req.query.limit) : 2;
+    const skip = req.query.skip ? Number(req.query.skip) : 0;
+    const review = await Review.find({})
+      .populate("user", "name")
+      .limit(limit)
+      .skip(skip);
+
+    const productsTotal = await Review.countDocuments();
+    const hasMore = skip + limit < productsTotal ? true : false;
+
+    return res.status(200).send({ review, hasMore });
   } catch (error) {
     res.status(500).send({ error: error.message });
   }
 });
-// reviewRouter.delete("/", async (req, res) => {
-//   try {
-//     const deleteReview = await Review.findByIdAndDelete(rtId);
-
-//     if (!deleteReview) return res.status(400).send({ message: "rtId is 없음" });
-//     return res.status(200).send({ message: "리뷰가 삭제되었습니다!" });
-//   } catch (error) {
-//     return res.status(400).send({ error: error.message });
-//   }
-// });
 
 //리뷰 뷰페이지
 reviewRouter.get("/:rpId", async (req, res) => {
@@ -64,6 +62,7 @@ reviewRouter.get("/:rpId", async (req, res) => {
   }
 });
 
+//리뷰 뷰 삭제
 reviewRouter.delete("/:rpId", async (req, res) => {
   try {
     const { rpId } = req.params;
@@ -78,5 +77,7 @@ reviewRouter.delete("/:rpId", async (req, res) => {
     return res.status(500).send({ error: error.message });
   }
 });
+
+//리뷰 리스트 삭제
 
 module.exports = reviewRouter;
