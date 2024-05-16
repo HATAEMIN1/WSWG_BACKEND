@@ -11,8 +11,12 @@ reviewRouter.post("/", async (req, res) => {
   try {
     const { content, rating, userId, restId } = req.body;
 
-    let user = await User.findById(userId);
-    let restaurant = await Restaurant.findById(restId);
+    const user = await User.findById(userId);
+    const restaurant = await Restaurant.findById(restId);
+
+    if (!user || !restaurant) {
+      return res.status(400).send({ error: "invalid user or restauerant ID" });
+    }
 
     const review = await new Review({ ...req.body, user, restaurant }).save();
     console.log(review);
@@ -26,9 +30,9 @@ reviewRouter.post("/", async (req, res) => {
 //리뷰 리스트
 reviewRouter.get("/", async (req, res) => {
   try {
-    const review = await Review.find({});
+    const reviews = await Review.find({});
 
-    return res.status(200).send({ review });
+    return res.status(200).send({ reviews });
   } catch (error) {
     res.status(500).send({ error: error.message });
   }
@@ -51,11 +55,16 @@ reviewRouter.get("/:rpId", async (req, res) => {
     if (!mongoose.isValidObjectId(rpId))
       res.status(400).send({ message: "not rpId" });
 
-    const reviewRouter = await Review.findOne({ _id: rtId }).populate({
+    const review = await Review.findOne({ rpId }).populate({
       path: "user",
       select: "name",
     });
-    return res.status(200).send({ meetUpPost });
+
+    if (!review) {
+      return res.status(404).send({ message: "Review not find" });
+    }
+
+    return res.status(200).send({ review });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: error.message });
@@ -65,12 +74,15 @@ reviewRouter.get("/:rpId", async (req, res) => {
 reviewRouter.delete("/:rpId", async (req, res) => {
   try {
     const { rpId } = req.params;
-    const deleteReview = await Review.findByIdAndDelete(rtId);
+    const deleteReview = await Review.findByIdAndDelete(rpId);
 
-    if (!deleteReview) return res.status(400).send({ message: "rtId is 없음" });
+    if (!deleteReview) {
+      return res.status(404).send({ message: "review not find" });
+    }
+
     return res.status(200).send({ message: "리뷰가 삭제되었습니다!" });
   } catch (error) {
-    return res.status(400).send({ error: error.message });
+    return res.status(500).send({ error: error.message });
   }
 });
 
