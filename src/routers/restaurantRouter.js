@@ -61,5 +61,18 @@ restaurantRouter.post("/:rtId/like", async (req, res) => {
     res.status(500).send({ error: e.message });
   }
 });
+restaurantRouter.delete("/like", async (req, res) => {
+  try {
+    const { likeId } = req.body;
+    await Like.findByIdAndDelete(likeId);
+    res.status(200).send("좋아요가 취소");
+  } catch (e) {
+    res.status(500).send({ error: e.message });
+  }
+});
+restaurantRouter.get("/:rtId/like", async (req, res) => {
+  const { rtId } = req.params;
+  const like = await Like.countDocuments();
+});
 
 module.exports = restaurantRouter;
