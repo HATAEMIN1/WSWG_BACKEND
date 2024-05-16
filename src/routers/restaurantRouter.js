@@ -1,6 +1,8 @@
 const express = require("express");
 const Restaurant = require("../models/Restaurant");
 const restaurantRouter = express.Router();
+const Like = require("../models/Like");
+const User = require("../models/User");
 
 const mateType = [
   { no: 1, name: "lover" },
@@ -31,6 +33,30 @@ restaurantRouter.get("/:cateId/:rtId", async (req, res) => {
     const { rtId } = req.params;
     const restaurant = await Restaurant.findOne({ _id: rtId });
     return res.status(200).send({ restaurant });
+  } catch (e) {
+    res.status(500).send({ error: e.message });
+  }
+});
+restaurantRouter.post("/:cateId/:userId/:rtId", async (req, res) => {
+  try {
+    const { userId, rtId } = req.params;
+    const restaurant = await Restaurant.findById(rtId);
+    restaurant.views++;
+    await restaurant.save();
+    console.log(restaurant.views);
+    res.status(200).send({ restaurant });
+  } catch (e) {
+    res.status(500).send({ error: e.message });
+  }
+});
+restaurantRouter.post("/:rtId/like", async (req, res) => {
+  try {
+    const { rtId } = req.params;
+    const { userId } = req.body;
+    const restaurant = await Restaurant.findById(rtId);
+    const user = await User.findById(userId);
+    const like = await new Like({ restaurant, user }).save();
+    res.status(200).send({ like });
   } catch (e) {
     res.status(500).send({ error: e.message });
   }
