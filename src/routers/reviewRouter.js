@@ -11,28 +11,21 @@ reviewRouter.post("/", async (req, res) => {
   try {
     const { content, rating, userId, restId } = req.body;
 
-    const user = await User.findById(userId);
-    const restaurant = await Restaurant.findById(restId);
-
-    if (!user || !restaurant) {
-      return res.status(400).send({ error: "invalid user or restauerant ID" });
-    }
+    let user = await User.findById(userId);
+    let restaurant = await Restaurant.findById(restId);
 
     const review = await new Review({ ...req.body, user, restaurant }).save();
-    console.log(review);
     return res.status(200).send({ review });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: error.message });
   }
 });
-
 //리뷰 리스트
 reviewRouter.get("/", async (req, res) => {
   try {
-    const reviews = await Review.find({});
-
-    return res.status(200).send({ reviews });
+    const review = await Review.find({}).populate("user", "name");
+    return res.status(200).send({ review });
   } catch (error) {
     res.status(500).send({ error: error.message });
   }
