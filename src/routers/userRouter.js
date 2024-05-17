@@ -46,6 +46,7 @@ userRouter.post("/kakao-login", async (req, res) => {
         userId: existingUser._id.toHexString(),
         email: existingUser.email,
         role: existingUser.role,
+        password: existingUser.password,
         image: { ...existingUser.image, originalname: profilePic },
       };
 
@@ -122,6 +123,7 @@ userRouter.post("/naver-login", async (req, res) => {
         userId: existingUser._id.toHexString(),
         email: existingUser.email,
         role: existingUser.role,
+        password: existingUser.password,
         image: { ...existingUser.image, originalname: profilePic },
       };
 
@@ -170,6 +172,7 @@ userRouter.post("/login", async (req, res) => {
       email: user.email,
       role: user.role,
       image: user.image,
+      password: user.password,
     };
 
     const accessToken = jwt.sign(payload, process.env.SECRET_KEY, {
@@ -184,6 +187,19 @@ userRouter.post("/login", async (req, res) => {
   }
 });
 
+userRouter.post("/passwordCheck", async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body; // newpassword is not encrypted, oldpassword is already hashed
+    console.log("oldPassword:", oldPassword);
+    console.log("newPassword", newPassword);
+    const isMatch = await compare(newPassword, oldPassword);
+    return res.status(200).send({ isMatch });
+  } catch (e) {
+    console.log("error:", e);
+    return res.status(500).send({ error: e.message });
+  }
+});
+
 userRouter.get("/auth", auth, async (req, res) => {
   try {
     const user = {
@@ -192,6 +208,7 @@ userRouter.get("/auth", auth, async (req, res) => {
       name: req.user.name,
       role: req.user.role,
       image: req.user.image,
+      password: req.user.password,
     };
     return res.status(200).send({ user });
   } catch (e) {
@@ -199,7 +216,7 @@ userRouter.get("/auth", auth, async (req, res) => {
   }
 });
 
-userRouter.post("/logout", auth, async (req, res) => {
+userRouter.post("/logout", auth, async (_, res) => {
   try {
     return res.status(200).send({ message: "로그아웃되셨습니다." });
   } catch (e) {
