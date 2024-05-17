@@ -1,6 +1,8 @@
 const express = require("express");
 const { mongoose } = require("mongoose");
 const User = require("../models/User");
+const Restaurant = require("../models/Restaurant");
+const Like = require("../models/Like");
 const userRouter = express.Router();
 const { upload } = require("../middlewares/imageUpload.js");
 const { hash, compare } = require("bcryptjs");
@@ -252,6 +254,24 @@ userRouter.get("/:userId", async (req, res) => {
   }
 });
 
+// 내가 찜한 가게 - like 누르면 백에 like 가 아직 안들어가서 그 기능 만들어 지면 만들기
+userRouter.get("/:userId/likedResturants", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (!mongoose.isValidObjectId(userId))
+      res.status(400).send({ message: "not a valid userId" });
+    const likes = await Like.find({ user: userId });
+    return res.status(200).send({ likes });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error });
+  }
+});
+
+// 내가 작성한 리뷰
+
+// 내가 등록한 우리 만날까
+
 userRouter.delete("/:userId", async function (req, res) {
   try {
     const user = await User.findByIdAndDelete(req.params.userId);
@@ -275,6 +295,25 @@ userRouter.put("/:userId", upload.single("image"), async function (req, res) {
         email,
         password,
         image,
+      },
+      { new: true }
+    );
+    return res.send({ user });
+  } catch (error) {
+    return res.status(500).send({ error: error.message });
+  }
+});
+
+userRouter.put("/:userId/pwdChange", async function (req, res) {
+  try {
+    const { password } = req.body;
+    const { userId } = req.params;
+    console.log("update user password to:", password);
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        password: await hash(password, 10),
       },
       { new: true }
     );
