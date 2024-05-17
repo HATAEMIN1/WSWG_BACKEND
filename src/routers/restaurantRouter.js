@@ -3,6 +3,7 @@ const Restaurant = require("../models/Restaurant");
 const restaurantRouter = express.Router();
 const Like = require("../models/Like");
 const User = require("../models/User");
+const mongoose = require("mongoose");
 
 const mateType = [
   { no: 1, name: "lover" },
@@ -48,31 +49,6 @@ restaurantRouter.post("/:cateId/:userId/:rtId", async (req, res) => {
   } catch (e) {
     res.status(500).send({ error: e.message });
   }
-});
-restaurantRouter.post("/:rtId/like", async (req, res) => {
-  try {
-    const { rtId } = req.params;
-    const { userId } = req.body;
-    const restaurant = await Restaurant.findById(rtId);
-    const user = await User.findById(userId);
-    const like = await new Like({ restaurant, user }).save();
-    res.status(200).send({ like });
-  } catch (e) {
-    res.status(500).send({ error: e.message });
-  }
-});
-restaurantRouter.delete("/like", async (req, res) => {
-  try {
-    const { likeId } = req.body;
-    await Like.findByIdAndDelete(likeId);
-    res.status(200).send("좋아요가 취소");
-  } catch (e) {
-    res.status(500).send({ error: e.message });
-  }
-});
-restaurantRouter.get("/:rtId/like", async (req, res) => {
-  const { rtId } = req.params;
-  const like = await Like.countDocuments();
 });
 
 module.exports = restaurantRouter;
