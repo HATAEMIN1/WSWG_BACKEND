@@ -8,12 +8,12 @@ likeRouter.post("/:rtId", async (req, res) => {
   try {
     const { rtId } = req.params;
     const { userId } = req.body;
-    console.log(userId);
     const restaurant = await Restaurant.findById({ _id: rtId });
     const user = await User.findById({ _id: userId });
     const like = await new Like({
       restaurant,
       user,
+      liked: true,
       createdAt: new Date(),
     }).save();
     res.status(200).send({ like });
@@ -24,9 +24,7 @@ likeRouter.post("/:rtId", async (req, res) => {
 likeRouter.delete("/:rtId", async (req, res) => {
   try {
     const { rtId } = req.params;
-    console.log(req.body);
     const { userId } = req.body;
-    console.log(userId);
     await Like.deleteOne({
       user: userId,
       restaurant: rtId,
@@ -39,8 +37,12 @@ likeRouter.delete("/:rtId", async (req, res) => {
 likeRouter.get("/:rtId", async (req, res) => {
   try {
     const { rtId } = req.params;
+    const { userId } = req.query;
+
+    const like = await Like.find({ restaurant: rtId, user: userId });
+    console.log(like);
     const likeCount = await Like.find({ restaurant: rtId }).countDocuments();
-    res.status(200).send({ likeCount });
+    res.status(200).send({ likeCount, like });
   } catch (e) {
     res.status(500).send({ error: e.message });
   }
