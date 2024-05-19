@@ -1,9 +1,6 @@
 const express = require("express");
 const Restaurant = require("../models/Restaurant");
 const restaurantRouter = express.Router();
-const Like = require("../models/Like");
-const User = require("../models/User");
-const mongoose = require("mongoose");
 
 const mateType = [
   { no: 1, name: "lover" },
@@ -19,11 +16,15 @@ restaurantRouter.get("/:cateId", async (req, res) => {
     const { cateId } = req.params;
     const limit = req.query.limit ? Number(req.query.limit) : 6;
     const skip = req.query.skip ? Number(req.query.skip) : 0;
-    const restaurant = await Restaurant.find({ "category.mateType": cateId })
-      .limit(limit)
-      .skip(skip);
-    const productsTotal = await Restaurant.countDocuments();
-    const hasMore = skip + limit < productsTotal ? true : false;
+    const { search } = req.query;
+    const findArgs = { "category.mateType": cateId };
+    if (search) {
+      findArgs["$text"] = { $search: search };
+    }
+
+    const restaurant = await Restaurant.find(findArgs).limit(limit).skip(skip);
+    const restaurantsTotal = await Restaurant.countDocuments(findArgs);
+    const hasMore = skip + limit < restaurantsTotal ? true : false;
     return res.status(200).send({ restaurant, hasMore });
   } catch (e) {
     res.status(500).send({ error: e.message });
