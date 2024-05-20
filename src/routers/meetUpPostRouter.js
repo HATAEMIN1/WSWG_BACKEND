@@ -78,4 +78,17 @@ meetUpPostRouter.delete("/:mpId", async (req, res) => {
     return res.status(400).send({ error: error.message });
   }
 });
+
+meetUpPostRouter.post("/:mpId/view", async (req, res) => {
+  try {
+    const { mpId } = req.params;
+    const { userId } = req.body;
+    const meetUpPost = await MeetUpPost.findById(mpId);
+    meetUpPost.views++;
+    await meetUpPost.save();
+    res.status(200).send({ meetUpPost });
+  } catch (e) {
+    res.status(500).send({ error: e.message });
+  }
+});
 module.exports = meetUpPostRouter;
