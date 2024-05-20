@@ -9,7 +9,7 @@ const restaurantRouter = require("./routers/restaurantRouter");
 const meetUpPostCommentRouter = require("./routers/meetUpPostCommentRouter");
 const reviewRouter = require("./routers/reviewRouter");
 const kakaoRouter = require("./routers/kakaoRouter");
-
+const likeRouter = require("./routers/likeRouter");
 
 dotenv.config(); //.env파필에있는것들을쓰되다른사람들한테보이지않게하기위해
 app.use(express.json());
@@ -23,6 +23,7 @@ const server = async () => {
     mongoose.set("debug", true);
     app.use("/users", userRouter);
     app.use("/restaurants", restaurantRouter);
+    app.use("/likes", likeRouter);
     app.use("/meet-posts", meetUpPostRouter);
     app.use("/review-posts", reviewRouter);
 

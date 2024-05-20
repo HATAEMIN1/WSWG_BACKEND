@@ -16,11 +16,15 @@ restaurantRouter.get("/:cateId", async (req, res) => {
     const { cateId } = req.params;
     const limit = req.query.limit ? Number(req.query.limit) : 6;
     const skip = req.query.skip ? Number(req.query.skip) : 0;
-    const restaurant = await Restaurant.find({ "category.mateType": cateId })
-      .limit(limit)
-      .skip(skip);
-    const productsTotal = await Restaurant.countDocuments();
-    const hasMore = skip + limit < productsTotal ? true : false;
+    const { search } = req.query;
+    const findArgs = { "category.mateType": cateId };
+    if (search) {
+      findArgs["$text"] = { $search: search };
+    }
+
+    const restaurant = await Restaurant.find(findArgs).limit(limit).skip(skip);
+    const restaurantsTotal = await Restaurant.countDocuments(findArgs);
+    const hasMore = skip + limit < restaurantsTotal ? true : false;
     return res.status(200).send({ restaurant, hasMore });
   } catch (e) {
     res.status(500).send({ error: e.message });
@@ -31,6 +35,18 @@ restaurantRouter.get("/:cateId/:rtId", async (req, res) => {
     const { rtId } = req.params;
     const restaurant = await Restaurant.findOne({ _id: rtId });
     return res.status(200).send({ restaurant });
+  } catch (e) {
+    res.status(500).send({ error: e.message });
+  }
+});
+restaurantRouter.post("/:cateId/:userId/:rtId", async (req, res) => {
+  try {
+    const { userId, rtId } = req.params;
+    const restaurant = await Restaurant.findById(rtId);
+    restaurant.views++;
+    await restaurant.save();
+    console.log(restaurant.views);
+    res.status(200).send({ restaurant });
   } catch (e) {
     res.status(500).send({ error: e.message });
   }
