@@ -18,5 +18,9 @@ const restaurantSchema = mongoose.Schema({
     ref: "like",
   },
 });
+
+restaurantSchema.index({
+  name: "text",
+});
 const Restaurant = mongoose.model("restaurant", restaurantSchema);
 module.exports = Restaurant;
