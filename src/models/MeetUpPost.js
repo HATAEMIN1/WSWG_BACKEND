@@ -7,7 +7,7 @@ const meetUpPostSchema = mongoose.Schema({
   views: { type: Number },
   latitude: { type: Number },
   longitude: { type: Number },
-  chatLink: { type: String, unique: true },
+  chatLink: { type: String },
   user: { type: Types.ObjectId, ref: "user", required: true },
   createdAt: Date,
 });

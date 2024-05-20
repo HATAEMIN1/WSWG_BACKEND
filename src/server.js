@@ -8,6 +8,8 @@ const meetUpPostRouter = require("./routers/meetUpPostRouter");
 const restaurantRouter = require("./routers/restaurantRouter");
 const meetUpPostCommentRouter = require("./routers/meetUpPostCommentRouter");
 const reviewRouter = require("./routers/reviewRouter");
+const kakaoRouter = require("./routers/kakaoRouter");
+
 
 dotenv.config(); //.env파필에있는것들을쓰되다른사람들한테보이지않게하기위해
 app.use(express.json());
@@ -25,6 +27,7 @@ const server = async () => {
     app.use("/review-posts", reviewRouter);
 
     app.use("/meet-posts/:mpId/comments", meetUpPostCommentRouter);
+    app.use("/meta", kakaoRouter);
     app.listen(4000, async function () {
       console.log("server on port 4000");
     });
