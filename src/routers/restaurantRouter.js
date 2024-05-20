@@ -52,4 +52,16 @@ restaurantRouter.post("/:cateId/:userId/:rtId", async (req, res) => {
   }
 });
 
+//------------------------------------------------------------
+// Router.get("/restaurantId", async (req, res) => {
+//   try {
+//     const restaurant = await Restaurant.findById(
+//       req.params.restaurantId
+//     ).populate("reviews");
+//     res.json({ restaurant });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// });
+
 module.exports = restaurantRouter;

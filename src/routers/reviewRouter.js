@@ -22,6 +22,7 @@ reviewRouter.post("/", async (req, res) => {
 });
 //리뷰 리스트
 reviewRouter.get("/", async (req, res) => {
+  // reviewRouter.get("/restaurant/:restId", async (req, res) => {
   try {
     const limit = req.query.limit ? Number(req.query.limit) : 2;
     const skip = req.query.skip ? Number(req.query.skip) : 0;
@@ -32,6 +33,9 @@ reviewRouter.get("/", async (req, res) => {
 
     const productsTotal = await Review.countDocuments();
     const hasMore = skip + limit < productsTotal ? true : false;
+
+    // const reviewsTotal = await Review.countDocuments();
+    // const hasMore = skip + limit < reviewsTotal;
 
     return res.status(200).send({ review, hasMore });
   } catch (error) {
@@ -46,7 +50,7 @@ reviewRouter.get("/:rpId", async (req, res) => {
     if (!mongoose.isValidObjectId(rpId))
       res.status(400).send({ message: "not rpId" });
 
-    const review = await Review.findOne({ rpId }).populate({
+    const review = await Review.findById({ _id: rpId }).populate({
       path: "user",
       select: "name",
     });
@@ -77,7 +81,5 @@ reviewRouter.delete("/:rpId", async (req, res) => {
     return res.status(500).send({ error: error.message });
   }
 });
-
-//리뷰 리스트 삭제
 
 module.exports = reviewRouter;
