@@ -4,7 +4,7 @@ const { Types } = require("mongoose");
 const meetUpPostSchema = mongoose.Schema({
   title: { type: String, required: true },
   content: { type: String, required: true },
-  views: { type: Number },
+  views: { type: Number, default: 0 },
   latitude: { type: Number },
   longitude: { type: Number },
   chatLink: { type: String, unique: true },
