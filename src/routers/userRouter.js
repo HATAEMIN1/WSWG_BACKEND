@@ -170,15 +170,23 @@ userRouter.post("/login", async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
-      return res.status(400).send({ message: "이메일을 확인해주세요" });
+      return res.status(400).send({ error: "존재하지 않는 이메일 입니다" });
     }
 
     const isMatch = await compare(req.body.password, user.password);
+    console.log(
+      "req.body.password:",
+      req.body.password,
+      "user.password:",
+      user.password
+    );
+    const hashedPwd = await hash(req.body.password, 10);
+    console.log("hashed req.body.password:", hashedPwd);
 
     if (!isMatch) {
       return res
         .status(400)
-        .send({ message: "비밀번호가 다릅니다. 비밀번호 확인해주세요" });
+        .send({ error: "비밀번호가 다릅니다. 비밀번호 확인해주세요" });
     }
 
     const payload = {
@@ -204,8 +212,6 @@ userRouter.post("/login", async (req, res) => {
 userRouter.post("/passwordCheck", async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body; // newpassword is not encrypted, oldpassword is already hashed
-    console.log("oldPassword:", oldPassword);
-    console.log("newPassword", newPassword);
     const isMatch = await compare(newPassword, oldPassword);
     return res.status(200).send({ isMatch });
   } catch (e) {
@@ -274,7 +280,7 @@ userRouter.get("/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
     if (!mongoose.isValidObjectId(userId))
-      res.status(400).send({ message: "not a valid userId" });
+      res.status(400).send({ error: "not a valid userId" });
 
     const user = await User.findById(userId);
 
@@ -290,7 +296,7 @@ userRouter.get("/:userId/likedResturants", async (req, res) => {
   try {
     const { userId } = req.params;
     if (!mongoose.isValidObjectId(userId))
-      res.status(400).send({ message: "not a valid userId" });
+      res.status(400).send({ error: "not a valid userId" });
     const likes = await Like.find({ user: userId });
     return res.status(200).send({ likes });
   } catch (error) {
@@ -337,17 +343,19 @@ userRouter.put("/:userId", upload.single("image"), async function (req, res) {
 
 userRouter.put("/:userId/pwdChange", async function (req, res) {
   try {
-    const { password } = req.body;
+    console.log("req.body:", req.body);
+    const { passwordNew } = req.body;
     const { userId } = req.params;
-    console.log("update user password to:", password);
+    console.log("update user password to:", passwordNew);
 
     const user = await User.findByIdAndUpdate(
       userId,
       {
-        password: await hash(password, 10),
+        password: await hash(passwordNew, 10),
       },
       { new: true }
     );
+    console.log("user with updated password:", user);
     return res.send({ user });
   } catch (error) {
     return res.status(500).send({ error: error.message });
