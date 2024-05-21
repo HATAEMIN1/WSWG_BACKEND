@@ -31,6 +31,7 @@ restaurantRouter.get("/:cateId", async (req, res) => {
     if (search) {
       findArgs["name"] = { $regex: search, $options: "i" };
     }
+
     const restaurant = await Restaurant.find(findArgs).limit(limit).skip(skip);
     const restaurantsTotal = await Restaurant.countDocuments(findArgs);
     const hasMore = skip + limit < restaurantsTotal ? true : false;
