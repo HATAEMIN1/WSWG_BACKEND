@@ -1,7 +1,7 @@
 const { mongoose, Types } = require("mongoose");
 
 const TagSchema = mongoose.Schema({
-  name: String,
+  name: [{ type: String }],
   review: {
     type: Types.ObjectId,
     ref: "Review",
