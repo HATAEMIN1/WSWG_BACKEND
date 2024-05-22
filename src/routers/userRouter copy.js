@@ -17,8 +17,11 @@ userRouter.post("/register", upload.single("image"), async (req, res) => {
   // make it so that if the name or email already exists, return error with 400 status code
   try {
     console.log("req.body:", req.body);
+    console.log("req.file:", req.file);
     const { name, email, password, passwordConfirm } = req.body;
-
+    const { filename, originalname } = req.file;
+    console.log("filename:", filename);
+    console.log("originalname:", originalname);
     if (password !== passwordConfirm) {
       res.status(400).send({ error: "비번이 비번확인과 일치하지 않습니다!" });
     }
@@ -32,15 +35,26 @@ userRouter.post("/register", upload.single("image"), async (req, res) => {
         .send({ error: "이미 존재하는 닉네임 또는 이메일 주소입니다!" });
     }
     const hashedPassword = await hash(password, 10);
-
-    const user = await new User({
-      name,
-      email,
-      password: hashedPassword,
-      createdAt: new Date(),
-    }).save();
-    console.log("user", user);
-    return res.status(200).send({ user });
+    if (filename && originalname) {
+      const image = { filename, originalname };
+      const user = await new User({
+        name,
+        email,
+        password: hashedPassword,
+        image,
+        createdAt: new Date(),
+      }).save();
+      console.log("user:", user);
+      return res.status(200).send({ user });
+    } else {
+      const user = await new User({
+        name,
+        email,
+        password: hashedPassword,
+        createdAt: new Date(),
+      }).save();
+      return res.status(200).send({ user });
+    }
   } catch (error) {}
 });
 
