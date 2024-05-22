@@ -30,15 +30,16 @@ reviewRouter.post("/", async (req, res) => {
 
 //이미지--------------------------------------------------->
 reviewRouter.post("/image", upload.single("image"), async (req, res) => {
+  //talend에서확인할때 'Form'으로설정, name이↑이거랑같아야함
   try {
     console.log(req.file.filename);
-    // const image = await new Image({
+    // const review = await new Review({
     //   originalFileName: req.file.originalname,
     //   key: req.file.filename,
     // });
-    return res.send(req.file.filename);
+    return res.send(req.file.filename); //key값만 받음
   } catch (error) {
-    console.log(error);
+    console.log(error.message);
   }
 });
 //--------------------------------------------------------->
