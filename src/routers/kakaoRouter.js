@@ -4,7 +4,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const kakaoRouter = express.Router();
 
-kakaoRouter.post('/', async (req, res) => {
+kakaoRouter.get('/', async (req, res) => {
     const { url } = req.body;
     try {
         const { data } = await axios.get(url);

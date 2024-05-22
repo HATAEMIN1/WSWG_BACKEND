@@ -5,37 +5,85 @@ const User = require("../models/User");
 // const Review = require("../models/Review");
 const Restaurant = require("../models/Restaurant");
 const Review = require("../models/Review");
+// const Tag = require("../models/Tag");
+const { upload } = require("../middlewares/imageUpload");
 
 //post먼저
 reviewRouter.post("/", async (req, res) => {
   try {
-    const { content, rating, userId, restId } = req.body;
+    const { userId, restId } = req.body;
     const user = await User.findById(userId);
     const restaurant = await Restaurant.findById(restId);
 
-    const review = await new Review({ ...req.body, user, restaurant }).save();
+    const review = await new Review({
+      ...req.body,
+      user: userId,
+      restaurant: restId,
+      createdAt: new Date(),
+    }).save();
     return res.status(200).send({ review });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error: error.message });
   }
 });
+
+//이미지--------------------------------------------------->
+reviewRouter.post("/image", upload.single("image"), async (req, res) => {
+  try {
+    console.log(req.file.filename);
+    // const image = await new Image({
+    //   originalFileName: req.file.originalname,
+    //   key: req.file.filename,
+    // });
+    return res.send(req.file.filename);
+  } catch (error) {
+    console.log(error);
+  }
+});
+//--------------------------------------------------------->
+
+//해시태그-------------------------------------------------->
+// reviewRouter.post("/hashtags", async (req, res) => {
+//   try {
+//     const { hashtags } = req.body;
+
+//     const tag = await new Tag({ name: hashtags }).save();
+//     return res.status(200).send({ tag });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send({ error: error.message });
+//   }
+// });
+
+// reviewRouter.get("/review-posts/:rpId/hashtags", async (req, res) => {
+//   try {
+//     const { rpId } = req.params;
+//     const tag = await Tag.find({});
+//     if (!mongoose.isValidObjectId(hashtagId))
+//       res.status(400).send({ message: "not hashtagId" });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send({ error: error.message });
+//   }
+// });
+
+//--------------------------------------------------------->
+
 //리뷰 리스트
 reviewRouter.get("/", async (req, res) => {
   // reviewRouter.get("/restaurant/:restId", async (req, res) => {
   try {
-    const limit = req.query.limit ? Number(req.query.limit) : 2;
+    const limit = req.query.limit ? Number(req.query.limit) : 5;
     const skip = req.query.skip ? Number(req.query.skip) : 0;
     const review = await Review.find({})
       .populate("user", "name")
       .limit(limit)
-      .skip(skip);
+      .skip(skip)
+      .sort({ createdAt: -1 });
 
     const productsTotal = await Review.countDocuments();
     const hasMore = skip + limit < productsTotal ? true : false;
-
-    // const reviewsTotal = await Review.countDocuments();
-    // const hasMore = skip + limit < reviewsTotal;
 
     return res.status(200).send({ review, hasMore });
   } catch (error) {

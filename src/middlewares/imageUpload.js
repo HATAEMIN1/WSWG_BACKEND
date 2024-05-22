@@ -25,10 +25,13 @@ const upload = multer({
     if (["image/jpeg", "image/png"].includes(file.mimetype)) {
       // err is always the first parameter of a callback, indicating if an error occurred or not.
       // cb = callback function: error (first arg - null if no error occured, otherwise Error object), acceptance flag(second arg - true or false)
-      cb(null, true); // callback function used to control whether an uploaded file should be accepted (true) or rejected(false)
+      return cb(null, true); // callback function used to control whether an uploaded file should be accepted (true) or rejected(false)
       // based on certain conditions such as file type validation as done here
     } else {
-      cb(new Error("invalid file type: only png and jpeg allowed"), false);
+      return cb(
+        new Error("invalid file type: only png and jpeg allowed"),
+        false
+      );
     }
   },
   // no limits specified to file size. e.g. can set limit to filesize like below:
