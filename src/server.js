@@ -11,6 +11,7 @@ const reviewRouter = require("./routers/reviewRouter");
 const kakaoRouter = require("./routers/kakaoRouter");
 const likeRouter = require("./routers/likeRouter");
 
+
 dotenv.config(); //.env파필에있는것들을쓰되다른사람들한테보이지않게하기위해
 app.use(express.json());
 app.use(cors()); //cors에러방지하기위해씀
