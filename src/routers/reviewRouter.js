@@ -11,7 +11,8 @@ const { upload } = require("../middlewares/imageUpload");
 //post먼저
 reviewRouter.post("/", async (req, res) => {
   try {
-    const { userId, restId, image } = req.body;
+    const { userId, restId } = req.body;
+    console.log(req.body);
     const user = await User.findById(userId);
     const restaurant = await Restaurant.findById(restId);
 
@@ -19,7 +20,6 @@ reviewRouter.post("/", async (req, res) => {
       ...req.body,
       user: user,
       restaurant: restaurant,
-      image: image,
       createdAt: new Date(),
     }).save();
     return res.status(200).send({ review });
@@ -33,7 +33,7 @@ reviewRouter.post("/", async (req, res) => {
 reviewRouter.post("/image", upload.single("image"), async (req, res) => {
   //talend에서확인할때 'Form'으로설정, name이↑이거랑같아야함
   try {
-    console.log(req.file);
+    // console.log(req.file);
     // const review = await new Review({
     //   originalFileName: req.file.originalname,
     //   key: req.file.filename,
