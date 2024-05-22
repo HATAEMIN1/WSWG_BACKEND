@@ -13,7 +13,7 @@ const axios = require("axios");
 const { jwtDecode } = require("jwt-decode");
 // const fs = require("fs");
 
-userRouter.post("/register", upload.single("image"), async (req, res) => {
+userRouter.post("/register", async (req, res) => {
   // make it so that if the name or email already exists, return error with 400 status code
   try {
     console.log("req.body:", req.body);
@@ -346,25 +346,47 @@ userRouter.put("/:userId", upload.single("image"), async function (req, res) {
   }
 });
 
-userRouter.put("/:userId/pwdChange", async function (req, res) {
-  try {
-    console.log("req.body:", req.body);
-    const { passwordNew } = req.body;
-    const { userId } = req.params;
-    console.log("update user password to:", passwordNew);
-
-    const user = await User.findByIdAndUpdate(
-      userId,
-      {
-        password: await hash(passwordNew, 10),
-      },
-      { new: true }
-    );
-    console.log("user with updated password:", user);
-    return res.send({ user });
-  } catch (error) {
-    return res.status(500).send({ error: error.message });
+userRouter.put(
+  "/:userId/pwdChange",
+  upload.single("image"),
+  async function (req, res) {
+    try {
+      console.log("req.body:", req.body);
+      console.log("req.file:", req.file);
+      const { filename, originalname } = req.file;
+      console.log("filename:", filename);
+      console.log("originalname:", originalname);
+      const { password } = req.body;
+      const { userId } = req.params;
+      console.log("update user password to:", password);
+      const hashedPassword = await hash(password, 10);
+      if (filename && originalname) {
+        const image = { filename, originalname };
+        const user = await User.findByIdAndUpdate(
+          userId,
+          {
+            password: hashedPassword,
+            image,
+          },
+          { new: true }
+        );
+        console.log("user with updated password:", user);
+        return res.send({ user });
+      } else {
+        const user = await User.findByIdAndUpdate(
+          userId,
+          {
+            password: hashedPassword,
+          },
+          { new: true }
+        );
+        console.log("user with updated password:", user);
+        return res.send({ user });
+      }
+    } catch (error) {
+      return res.status(500).send({ error: error.message });
+    }
   }
-});
+);
 
 module.exports = { userRouter };
