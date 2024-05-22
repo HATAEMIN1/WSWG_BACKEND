@@ -17,9 +17,12 @@ restaurantRouter.get("/:cateId", async (req, res) => {
     const mateTypeName = mateType.find((type) => type.cateId === cateId)?.name; // 해당 cateId의 mateType 이름 찾기
     const limit = req.query.limit ? Number(req.query.limit) : 0;
     const skip = req.query.skip ? Number(req.query.skip) : 0;
-    const { search } = req.query;
-    const { filters } = req.query;
-    const findArgs = { "category.mateType": mateTypeName };
+    const { search, filters, foodtype } = req.query;
+    console.log(foodtype);
+    const findArgs = {
+      "category.mateType": mateTypeName,
+      "category.foodtype": foodtype,
+    };
     if (filters) {
       if (filters.metropolitan) {
         findArgs["address.metropolitan"] = filters.metropolitan;
@@ -31,7 +34,6 @@ restaurantRouter.get("/:cateId", async (req, res) => {
     if (search) {
       findArgs["name"] = { $regex: search, $options: "i" };
     }
-
     const restaurant = await Restaurant.find(findArgs).limit(limit).skip(skip);
     const restaurantsTotal = await Restaurant.countDocuments(findArgs);
     const hasMore = skip + limit < restaurantsTotal ? true : false;
