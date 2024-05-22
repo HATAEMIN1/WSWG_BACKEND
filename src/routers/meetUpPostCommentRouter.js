@@ -24,8 +24,8 @@ meetUpPostCommentRouter.post("/", async (req, res) => {
     ]);
     const comment = await new MeetUpPostComment({
       content,
-      meetUpPost,
-      user,
+      meetUpPost:mpId,
+      user:userId,
     }).save();
     return res.status(200).send({ comment });
   } catch (error) {
@@ -36,6 +36,8 @@ meetUpPostCommentRouter.post("/", async (req, res) => {
 meetUpPostCommentRouter.get("/", async (req, res) => {
   try {
     const { mpId } = req.params;
+    console.log("mpId:", mpId); // mpId 값을 로그로 출력
+    console.log("req.params:", req.params);
     if (!mongoose.isValidObjectId(mpId))
       return res.status(400).send({ message: "mpId is 없음" });
     const comment = await MeetUpPostComment.find({ meetUpPost: mpId })
