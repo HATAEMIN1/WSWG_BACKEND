@@ -73,17 +73,19 @@ reviewRouter.post("/image", upload.single("image"), async (req, res) => {
 //--------------------------------------------------------->
 
 //리뷰 리스트
-reviewRouter.get("/", async (req, res) => {
+reviewRouter.get("/:rtId", async (req, res) => {
   // reviewRouter.get("/restaurant/:restId", async (req, res) => {
   try {
+    const { rtId } = req.params;
+    // console.log(rtId);
     const limit = req.query.limit ? Number(req.query.limit) : 5;
     const skip = req.query.skip ? Number(req.query.skip) : 0;
-    const review = await Review.find({})
+    const review = await Review.find({ restaurant: rtId })
       .populate("user", "name")
       .limit(limit)
       .skip(skip)
       .sort({ createdAt: -1 });
-
+    console.log(review);
     const productsTotal = await Review.countDocuments();
     const hasMore = skip + limit < productsTotal ? true : false;
 
@@ -94,7 +96,9 @@ reviewRouter.get("/", async (req, res) => {
 });
 
 //리뷰 뷰페이지
-reviewRouter.get("/:rpId", async (req, res) => {
+reviewRouter.get("/:rpId/view", async (req, res) => {
+  const { rpId } = req.params;
+  console.log(rpId);
   try {
     const { rpId } = req.params;
     if (!mongoose.isValidObjectId(rpId))
@@ -104,11 +108,9 @@ reviewRouter.get("/:rpId", async (req, res) => {
       path: "user",
       select: "name",
     });
-
     if (!review) {
       return res.status(404).send({ message: "Review not find" });
     }
-
     return res.status(200).send({ review });
   } catch (error) {
     console.log(error);
