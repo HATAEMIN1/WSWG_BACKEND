@@ -3,7 +3,12 @@ const { Types } = require("mongoose");
 
 const restaurantSchema = mongoose.Schema({
   name: { type: String, required: true },
-  address: { type: String, required: true, unique: true },
+  address: {
+    metropolitan: { type: String },
+    city: { type: String },
+    district: { type: String },
+    detailedAddress: { type: String },
+  },
   image: [{ type: String }],
   category: {
     foodtype: { type: String },
