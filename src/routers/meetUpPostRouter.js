@@ -117,6 +117,7 @@ meetUpPostRouter.post("/:mpId/view", async (req, res) => {
     const { userId } = req.body;
     const meetUpPost = await MeetUpPost.findById(mpId);
     meetUpPost.views++;
+    console.log(meetUpPost)
     await meetUpPost.save();
     res.status(200).send({ meetUpPost });
   } catch (e) {
