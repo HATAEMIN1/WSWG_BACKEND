@@ -15,7 +15,7 @@ dotenv.config(); //.env파필에있는것들을쓰되다른사람들한테보이
 app.use(express.json());
 app.use(cors()); //cors에러방지하기위해씀
 
-// app.use("/uploads",express.static("uploads"))
+app.use("/uploads", express.static("uploads"));
 
 const server = async () => {
   try {
