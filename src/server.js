@@ -17,6 +17,7 @@ app.use(cors()); //cors에러방지하기위해씀
 
 app.use("/uploads", express.static("uploads")); //static:image파일을들어갈수잇는권한을갖고잇는애
 
+
 const server = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URL);
