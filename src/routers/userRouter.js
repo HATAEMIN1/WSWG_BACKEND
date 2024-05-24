@@ -351,21 +351,15 @@ userRouter.put(
   upload.single("image"),
   async function (req, res) {
     try {
-      console.log("req.body:", req.body);
-      console.log("req.file:", req.file);
-      const { filename, originalname } = req.file;
-      console.log("filename:", filename);
-      console.log("originalname:", originalname);
-      const { password } = req.body;
       const { userId } = req.params;
-      console.log("update user password to:", password);
 
       // scenarios: 1. image change AND password change
       // 2. image chnage only but no password change
       // 3. password change only but no image change
-      if (filename && originalname && password) {
+      if (req.file && req.body.password) {
+        const { filename, originalname } = req.file;
         const image = { filename, originalname };
-        const hashedPassword = await hash(password, 10);
+        const hashedPassword = await hash(req.body.password, 10);
         const user = await User.findByIdAndUpdate(
           userId,
           {
@@ -376,8 +370,8 @@ userRouter.put(
         );
         console.log("user with updated password and image:", user);
         return res.send({ user });
-      } else if (!filename && !originalname && password) {
-        const hashedPassword = await hash(password, 10);
+      } else if (!req.file && req.body.password) {
+        const hashedPassword = await hash(req.body.password, 10);
         const user = await User.findByIdAndUpdate(
           userId,
           {
@@ -387,7 +381,8 @@ userRouter.put(
         );
         console.log("user with updated password:", user);
         return res.send({ user });
-      } else if (filename && originalname && !password) {
+      } else if (req.file && !req.body.password) {
+        const { filename, originalname } = req.file;
         const image = { filename, originalname };
         const user = await User.findByIdAndUpdate(
           userId,
