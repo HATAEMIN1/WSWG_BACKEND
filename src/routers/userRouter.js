@@ -369,7 +369,7 @@ userRouter.put(
           { new: true }
         );
         console.log("user with updated password and image:", user);
-        return res.send({ user });
+        return res.send({ user, passwordChange: true });
       } else if (!req.file && req.body.password) {
         const hashedPassword = await hash(req.body.password, 10);
         const user = await User.findByIdAndUpdate(
@@ -380,7 +380,7 @@ userRouter.put(
           { new: true }
         );
         console.log("user with updated password:", user);
-        return res.send({ user });
+        return res.send({ user, passwordChange: true });
       } else if (req.file && !req.body.password) {
         const { filename, originalname } = req.file;
         const image = { filename, originalname };
@@ -392,7 +392,7 @@ userRouter.put(
           { new: true }
         );
         console.log("user with updated image:", user);
-        return res.send({ user });
+        return res.send({ user, passwordChange: false });
       }
     } catch (error) {
       return res.status(500).send({ error: error.message });
