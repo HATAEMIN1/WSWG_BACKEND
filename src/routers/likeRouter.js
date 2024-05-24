@@ -8,6 +8,10 @@ likeRouter.post("/:rtId", async (req, res) => {
   try {
     const { rtId } = req.params;
     const { userId } = req.body;
+    if (!userId) {
+      return res.status(400).send({ error: "userId is required" });
+    }
+
     const restaurant = await Restaurant.findById({ _id: rtId });
     const user = await User.findById({ _id: userId });
     const like = await new Like({
@@ -25,6 +29,10 @@ likeRouter.delete("/:rtId", async (req, res) => {
   try {
     const { rtId } = req.params;
     const { userId } = req.body;
+    if (!userId) {
+      return res.status(400).send({ error: "userId is required" });
+    }
+
     await Like.deleteOne({
       user: userId,
       restaurant: rtId,
@@ -38,9 +46,10 @@ likeRouter.get("/:rtId", async (req, res) => {
   try {
     const { rtId } = req.params;
     const { userId } = req.query;
-
-    const like = await Like.find({ restaurant: rtId, user: userId });
-    console.log(like);
+    let like = [];
+    if (userId) {
+      like = await Like.find({ restaurant: rtId, user: userId });
+    }
     const likeCount = await Like.find({ restaurant: rtId }).countDocuments();
     res.status(200).send({ likeCount, like });
   } catch (e) {
