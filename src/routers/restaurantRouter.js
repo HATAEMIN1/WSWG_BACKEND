@@ -21,7 +21,7 @@ restaurantRouter.get("/:cateId", async (req, res) => {
     console.log(foodtype);
     const findArgs = {
       "category.mateType": mateTypeName,
-      "category.foodtype": foodtype,
+      "category.foodType": foodtype,
     };
     if (filters) {
       if (filters.metropolitan) {
