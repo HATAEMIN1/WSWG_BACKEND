@@ -59,7 +59,6 @@ restaurantRouter.post("/:cateId/:rtId/view", async (req, res) => {
   try {
     const { rtId } = req.params;
     const restaurant = await Restaurant.findById(rtId);
-    console.log();
     restaurant.views++;
     await restaurant.save();
     res.status(200).send({ restaurant });
@@ -71,7 +70,6 @@ restaurantRouter.post("/:cateId/:rtId/view", async (req, res) => {
 restaurantRouter.post("/location", async (req, res) => {
   try {
     const { lat, lon } = req.body;
-    console.log(lat, lon);
     // 현재 위치에서 2km 이내의 레스토랑 데이터 조회
     const restaurants = await Restaurant.aggregate([
       {
