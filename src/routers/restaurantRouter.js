@@ -21,7 +21,7 @@ restaurantRouter.get("/:cateId", async (req, res) => {
     console.log(foodtype);
     const findArgs = {
       "category.mateType": mateTypeName,
-      "category.foodtype": foodtype,
+      "category.foodType": foodtype,
     };
     if (filters) {
       if (filters.metropolitan) {
@@ -79,7 +79,7 @@ restaurantRouter.post("/location", async (req, res) => {
             coordinates: [parseFloat(lon), parseFloat(lat)], // 경도, 위도 순서
           },
           distanceField: "distance",
-          maxDistance: 500, // 최대 거리 (미터 단위, 여기서는 2km) 2000
+          maxDistance: 2000, // 최대 거리 (미터 단위, 여기서는 2km) 2000
           spherical: true,
         },
       },
