@@ -71,7 +71,7 @@ restaurantRouter.post("/location", async (req, res) => {
   try {
     const { lat, lon } = req.body;
     // 현재 위치에서 2km 이내의 레스토랑 데이터 조회
-    const restaurants = await Restaurant.aggregate([
+    const restaurant = await Restaurant.aggregate([
       {
         $geoNear: {
           near: {
@@ -79,12 +79,12 @@ restaurantRouter.post("/location", async (req, res) => {
             coordinates: [parseFloat(lon), parseFloat(lat)], // 경도, 위도 순서
           },
           distanceField: "distance",
-          maxDistance: 1000, // 최대 거리 (미터 단위, 여기서는 2km) 2000
+          maxDistance: 500, // 최대 거리 (미터 단위, 여기서는 2km) 2000
           spherical: true,
         },
       },
     ]);
-    return res.status(200).json({ restaurants }); // 조회된 레스토랑 데이터를 JSON 응답으로 보냄
+    return res.status(200).json({ restaurant }); // 조회된 레스토랑 데이터를 JSON 응답으로 보냄
   } catch (e) {
     console.log(e.message);
     return res.status(500).json({ error: "데이터 조회 중 오류 발생" });
