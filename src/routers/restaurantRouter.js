@@ -96,4 +96,23 @@ restaurantRouter.post("/location", async (req, res) => {
     return res.status(500).json({ error: "데이터 조회 중 오류 발생" });
   }
 });
+restaurantRouter.get("/", async (req, res) => {
+  try {
+    const latitude = parseFloat(req.query.latitude);
+    const longitude = parseFloat(req.query.longitude);
+    const restaurant = await Restaurant.find({
+      location: {
+        $near: {
+          $geometry: {
+            type: "Point",
+            coordinates: [longitude, latitude],
+          },
+        },
+      },
+    });
+    res.status(200).send({ restaurant });
+  } catch (e) {
+    res.status(500).send({ error: e.message });
+  }
+});
 module.exports = restaurantRouter;
