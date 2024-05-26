@@ -69,7 +69,12 @@ restaurantRouter.post("/:cateId/:rtId/view", async (req, res) => {
 
 restaurantRouter.post("/location", async (req, res) => {
   try {
-    const { lat, lon } = req.body;
+    const { lat, lon, cateId } = req.body;
+    const mateTypeName = mateType.find((type) => type.cateId === cateId)?.name;
+    const findArgs = {};
+    if (cateId) {
+      findArgs["category.mateType"] = mateTypeName;
+    }
     // 현재 위치에서 2km 이내의 레스토랑 데이터 조회
     const restaurant = await Restaurant.aggregate([
       {
@@ -83,6 +88,7 @@ restaurantRouter.post("/location", async (req, res) => {
           spherical: true,
         },
       },
+      { $match: findArgs },
     ]);
     return res.status(200).json({ restaurant }); // 조회된 레스토랑 데이터를 JSON 응답으로 보냄
   } catch (e) {
