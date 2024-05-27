@@ -347,21 +347,19 @@ userRouter.put("/:userId", upload.single("image"), async function (req, res) {
 });
 
 userRouter.put(
-  "/:userId/pwdChange",
+  "/:userId/update",
   upload.single("image"),
   async function (req, res) {
     try {
-      console.log("req.body:", req.body);
-      console.log("req.file:", req.file);
-      const { filename, originalname } = req.file;
-      console.log("filename:", filename);
-      console.log("originalname:", originalname);
-      const { password } = req.body;
       const { userId } = req.params;
-      console.log("update user password to:", password);
-      const hashedPassword = await hash(password, 10);
-      if (filename && originalname) {
+
+      // scenarios: 1. image change AND password change
+      // 2. image chnage only but no password change
+      // 3. password change only but no image change
+      if (req.file && req.body.password) {
+        const { filename, originalname } = req.file;
         const image = { filename, originalname };
+        const hashedPassword = await hash(req.body.password, 10);
         const user = await User.findByIdAndUpdate(
           userId,
           {
@@ -370,9 +368,10 @@ userRouter.put(
           },
           { new: true }
         );
-        console.log("user with updated password:", user);
+        console.log("user with updated password and image:", user);
         return res.send({ user });
-      } else {
+      } else if (!req.file && req.body.password) {
+        const hashedPassword = await hash(req.body.password, 10);
         const user = await User.findByIdAndUpdate(
           userId,
           {
@@ -381,6 +380,18 @@ userRouter.put(
           { new: true }
         );
         console.log("user with updated password:", user);
+        return res.send({ user });
+      } else if (req.file && !req.body.password) {
+        const { filename, originalname } = req.file;
+        const image = { filename, originalname };
+        const user = await User.findByIdAndUpdate(
+          userId,
+          {
+            image,
+          },
+          { new: true }
+        );
+        console.log("user with updated image:", user);
         return res.send({ user });
       }
     } catch (error) {

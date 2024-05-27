@@ -10,7 +10,6 @@ meetUpPostCommentRouter.post("/", async (req, res) => {
     const { mpId } = req.params;
     const { userId, content } = req.body;
 
-    console.log(mpId);
     if (!mongoose.isValidObjectId(mpId))
       return res.status(400).send({ message: "mpId is 없음" });
     if (!mongoose.isValidObjectId(userId))
@@ -24,8 +23,8 @@ meetUpPostCommentRouter.post("/", async (req, res) => {
     ]);
     const comment = await new MeetUpPostComment({
       content,
-      meetUpPost:mpId,
-      user:userId,
+      meetUpPost: mpId,
+      user: userId,
     }).save();
     return res.status(200).send({ comment });
   } catch (error) {
@@ -35,18 +34,28 @@ meetUpPostCommentRouter.post("/", async (req, res) => {
 
 meetUpPostCommentRouter.get("/", async (req, res) => {
   try {
-    const { mpId } = req.params;
-    console.log("mpId:", mpId); // mpId 값을 로그로 출력
-    console.log("req.params:", req.params);
-    if (!mongoose.isValidObjectId(mpId))
-      return res.status(400).send({ message: "mpId is 없음" });
-    const comment = await MeetUpPostComment.find({ meetUpPost: mpId })
-      .populate([{ path: "user", select: "name" }])
-      .sort({ createdAt: 1 });
+      const { mpId } = req.params;
+      const { page = 1, limit = 10 } = req.query;
 
-    return res.status(200).send({ comment });
+      if (!mongoose.isValidObjectId(mpId))
+          return res.status(400).send({ message: "mpId is 없음" });
+
+      const skip = (page - 1) * limit;
+
+      // 전체 댓글 수를 가져옵니다.
+      const totalComments = await MeetUpPostComment.countDocuments({ meetUpPost: mpId });
+
+      const comments = await MeetUpPostComment.find({ meetUpPost: mpId })
+          .populate([{ path: "user", select: "name" }])
+          .sort({ createdAt: 1 })
+          .skip(skip)
+          .limit(Number(limit));
+
+      console.log("응답 데이터:", { comments, totalComments });
+
+      return res.status(200).send({ comments, totalComments });
   } catch (error) {
-    return res.status(400).send({ error: error.message });
+      return res.status(400).send({ error: error.message });
   }
 });
 

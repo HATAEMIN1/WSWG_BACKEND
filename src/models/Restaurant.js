@@ -10,7 +10,7 @@ const restaurantSchema = mongoose.Schema({
   },
   image: [{ type: String }],
   category: {
-    foodtype: { type: String },
+    foodType: { type: String },
     mateType: { type: String },
   },
   views: { type: Number, default: 0 },
@@ -30,6 +30,7 @@ const restaurantSchema = mongoose.Schema({
 
 restaurantSchema.index({
   name: "text",
+  location: "2dsphere",
 });
 const Restaurant = mongoose.model("restaurant", restaurantSchema);
 module.exports = Restaurant;
