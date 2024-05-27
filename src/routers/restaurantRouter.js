@@ -100,16 +100,19 @@ restaurantRouter.get("/", async (req, res) => {
   try {
     const latitude = parseFloat(req.query.latitude);
     const longitude = parseFloat(req.query.longitude);
-    const restaurant = await Restaurant.find({
-      location: {
-        $near: {
-          $geometry: {
+    const restaurant = await Restaurant.aggregate([
+      {
+        $geoNear: {
+          near: {
             type: "Point",
-            coordinates: [longitude, latitude],
+            coordinates: [longitude, latitude], // 경도, 위도 순서
           },
+          distanceField: "distance", // 결과 문서에 추가될 필드 이름
+          maxDistance: 1, // 최대 거리 (미터 단위)
+          spherical: true, // 구 형태의 지구를 고려할지 여부
         },
       },
-    });
+    ]).limit(1);
     res.status(200).send({ restaurant });
   } catch (e) {
     res.status(500).send({ error: e.message });
