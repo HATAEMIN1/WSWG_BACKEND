@@ -71,10 +71,23 @@ restaurantRouter.post("/location", async (req, res) => {
   try {
     const { lat, lon, cateId } = req.body;
     const mateTypeName = mateType.find((type) => type.cateId === cateId)?.name;
+    const { filters } = req.query;
     const findArgs = {};
     if (cateId) {
       findArgs["category.mateType"] = mateTypeName;
     }
+    if (filters) {
+      if (filters.metropolitan) {
+        findArgs["address.metropolitan"] = filters.metropolitan;
+      }
+      if (filters.city) {
+        findArgs["address.city"] = filters.city;
+      }
+      if (filters.district) {
+        findArgs["address.district"] = filters.district;
+      }
+    }
+    console.log(findArgs);
     // 현재 위치에서 2km 이내의 레스토랑 데이터 조회
     const restaurant = await Restaurant.aggregate([
       {
