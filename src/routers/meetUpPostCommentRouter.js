@@ -21,16 +21,29 @@ meetUpPostCommentRouter.post("/", async (req, res) => {
       MeetUpPost.findById(mpId),
       User.findById(userId),
     ]);
-    const comment = await new MeetUpPostComment({
+    if (!meetUpPost)
+      return res.status(400).send({ message: "meetUpPost가 없음" });
+    if (!user)
+      return res.status(400).send({ message: "user가 없음" });
+
+    let comment = new MeetUpPostComment({
       content,
       meetUpPost: mpId,
       user: userId,
-    }).save();
+    });
+
+    comment = await comment.save();
+    comment = await comment.populate("user", "name image.filename");
+
     return res.status(200).send({ comment });
   } catch (error) {
+    console.error("Error creating comment:", error);
     return res.status(400).send({ error: error.message });
   }
 });
+
+
+
 
 meetUpPostCommentRouter.get("/", async (req, res) => {
   try {
@@ -46,8 +59,8 @@ meetUpPostCommentRouter.get("/", async (req, res) => {
       const totalComments = await MeetUpPostComment.countDocuments({ meetUpPost: mpId });
 
       const comments = await MeetUpPostComment.find({ meetUpPost: mpId })
-          .populate([{ path: "user", select: "name" }])
-          .sort({ createdAt: 1 })
+          .populate([{ path: "user", select: "name image.filename" }])
+          .sort({ createdAt: -1 }) // 최신순으로 정렬
           .skip(skip)
           .limit(Number(limit));
 
@@ -58,6 +71,12 @@ meetUpPostCommentRouter.get("/", async (req, res) => {
       return res.status(400).send({ error: error.message });
   }
 });
+
+
+
+
+
+
 
 meetUpPostCommentRouter.delete("/:commentId", async (req, res) => {
   try {
