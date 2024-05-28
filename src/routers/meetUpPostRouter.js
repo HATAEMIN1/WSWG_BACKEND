@@ -87,6 +87,21 @@ meetUpPostRouter.post("/:mata", async (req, res) => {
   }
 });
 
+meetUpPostRouter.get("/user/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const meetUpPosts = await MeetUpPost.find({ user: userId }).populate("user", "name");
+    if (!meetUpPosts) {
+      return res.status(404).send({ message: "MeetUpPosts not found" });
+    }
+    return res.status(200).send({ meetUpPosts });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: error.message });
+  }
+});
+
+
 meetUpPostRouter.get("/:mpId", async (req, res) => {
   try {
     const { mpId } = req.params;
