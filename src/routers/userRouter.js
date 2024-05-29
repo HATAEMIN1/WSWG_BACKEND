@@ -311,6 +311,22 @@ userRouter.get("/:userId/likedResturants", async (req, res) => {
 });
 
 // 내가 작성한 리뷰
+// userRouter.get("/user/:userId", async (req, res) => {
+//   try {
+//     const { userId } = req.params;
+//     const reviews = await Review.find({ user: userId })
+//       .populate("restaurant", "name") // 리뷰와 관련된 식당 정보 가져오기
+//       .sort({ createdAt: -1 }); // 작성일자를 내림차순으로 정렬
+
+//     if (!reviews.length) {
+//       return res.status(404).send({ message: "작성한 리뷰가 없습니다" });
+//     }
+//     return res.status(200).send({ reviews });
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).send({ error: error.message });
+//   }
+// });
 
 // 내가 등록한 우리 만날까
 
