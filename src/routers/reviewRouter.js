@@ -91,6 +91,22 @@ reviewRouter.get("/:rpId/view", async (req, res) => {
   }
 });
 
+// 새로운 라우터 추가: 특정 사용자가 작성한 모든 리뷰 가져오기
+reviewRouter.get("/user/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const reviews = await Review.find({ user: userId }).populate("restaurant", "name");
+    if (!reviews) {
+      return res.status(404).send({ message: "Reviews not found" });
+    }
+    return res.status(200).send({ reviews });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: error.message });
+  }
+});
+
+
 //리뷰 뷰 삭제
 reviewRouter.delete("/:rpId", async (req, res) => {
   try {
