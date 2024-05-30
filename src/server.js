@@ -7,7 +7,7 @@ const { userRouter } = require("./routers/userRouter");
 const meetUpPostRouter = require("./routers/meetUpPostRouter");
 const restaurantRouter = require("./routers/restaurantRouter");
 const meetUpPostCommentRouter = require("./routers/meetUpPostCommentRouter");
-const reviewRouter = require("./routers/reviewRouter");
+const reviewRouter = require("./routers/reviewRouter"); // 리뷰 라우터 추가
 const kakaoRouter = require("./routers/kakaoRouter");
 const likeRouter = require("./routers/likeRouter");
 
@@ -16,7 +16,6 @@ app.use(express.json());
 app.use(cors()); //cors에러방지하기위해씀
 
 app.use("/uploads", express.static("uploads")); //static:image파일을들어갈수잇는권한을갖고잇는애
-
 
 const server = async () => {
   try {
@@ -28,7 +27,7 @@ const server = async () => {
     app.use("/restaurants", restaurantRouter);
     app.use("/likes", likeRouter);
     app.use("/meet-posts", meetUpPostRouter);
-    app.use("/review-posts", reviewRouter);
+    app.use("/reviews", reviewRouter);  // 리뷰 라우터 추가
 
     app.use("/meet-posts/:mpId/comments", meetUpPostCommentRouter);
     app.use("/meta", kakaoRouter);

@@ -7,7 +7,7 @@ const reviewSchema = mongoose.Schema({
   createdAt: Date,
   user: { type: Types.ObjectId, ref: "user" },
   restaurant: { type: Types.ObjectId, ref: "restaurant" },
-  hashTag: [{ type: String }],
+  hashTag: [{ type: String }],default: [],
 });
 const Review = mongoose.model("review", reviewSchema);
 module.exports = Review;
