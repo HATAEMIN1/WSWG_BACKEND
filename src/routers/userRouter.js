@@ -1,7 +1,8 @@
 const express = require("express");
 const { mongoose } = require("mongoose");
 const User = require("../models/User");
-const Restaurant = require("../models/Restaurant");
+// const Restaurant = require("../models/Restaurant");
+const MeetUpPost = require("../models/MeetUpPost.js");
 const Like = require("../models/Like");
 const userRouter = express.Router();
 const { upload } = require("../middlewares/imageUpload.js");
@@ -302,8 +303,11 @@ userRouter.get("/:userId/likedResturants", async (req, res) => {
     const { userId } = req.params;
     if (!mongoose.isValidObjectId(userId))
       res.status(400).send({ error: "not a valid userId" });
-    const likes = await Like.find({ user: userId });
-    return res.status(200).send({ likes });
+    const likes = await Like.find({ user: userId, liked: true }).populate(
+      "restaurant"
+    );
+    const restaurants = likes.map((like) => like.restaurant);
+    return res.status(200).send({ restaurants });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error });
@@ -329,6 +333,18 @@ userRouter.get("/:userId/likedResturants", async (req, res) => {
 // });
 
 // 내가 등록한 우리 만날까
+userRouter.get("/:userId/meetups", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (!mongoose.isValidObjectId(userId))
+      res.status(400).send({ error: "not a valid userId" });
+    const meetupPosts = await MeetUpPost.find({ user: userId });
+    return res.status(200).send({ meetupPosts });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error });
+  }
+});
 
 userRouter.delete("/:userId", async function (req, res) {
   try {
