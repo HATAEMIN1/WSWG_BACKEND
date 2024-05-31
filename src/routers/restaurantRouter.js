@@ -14,38 +14,47 @@ const mateType = [
 restaurantRouter.get("/:cateId", async (req, res) => {
   try {
     const { cateId } = req.params;
-    const mateTypeName = mateType.find((type) => type.cateId === cateId)?.name; // 해당 cateId의 mateType 이름 찾기
-    const limit = req.query.limit ? Number(req.query.limit) : 0;
+    const mateTypeName = mateType.find((type) => type.cateId === cateId)?.name;
+    const limit = req.query.limit ? Number(req.query.limit) : 10;
     const skip = req.query.skip ? Number(req.query.skip) : 0;
-    const { search, filters, foodtype } = req.query;
-    console.log(foodtype);
+    const { search, filters } = req.query;
+
     const findArgs = {
       "category.mateType": mateTypeName,
-      "category.foodType": foodtype,
     };
+
     if (filters) {
-      if (filters.metropolitan) {
-        findArgs["address.metropolitan"] = filters.metropolitan;
+      const parsedFilters = JSON.parse(filters);
+      if (parsedFilters.metropolitan) {
+        findArgs["location.metropolitan"] = parsedFilters.metropolitan;
       }
-      if (filters.city) {
-        findArgs["address.city"] = filters.city;
+      if (parsedFilters.city) {
+        findArgs["location.city"] = parsedFilters.city;
       }
     }
+
     if (search) {
       findArgs["name"] = { $regex: search, $options: "i" };
     }
-    const restaurant = await Restaurant.find(findArgs).limit(limit).skip(skip);
+
+    console.log("Search Parameters:", findArgs); // 검색 조건 로그 추가
+
+    const restaurants = await Restaurant.find(findArgs).limit(limit).skip(skip);
+    console.log("Found Restaurants:", restaurants); // 검색된 레스토랑 로그 추가
+
     const restaurantsTotal = await Restaurant.countDocuments(findArgs);
-    const hasMore = skip + limit < restaurantsTotal ? true : false;
-    return res.status(200).send({ restaurant, hasMore });
+    const hasMore = skip + limit < restaurantsTotal;
+
+    return res.status(200).send({ restaurant: restaurants, hasMore });
   } catch (e) {
     res.status(500).send({ error: e.message });
   }
 });
+
 restaurantRouter.get("/:cateId/:rtId", async (req, res) => {
   try {
     const { rtId, cateId } = req.params;
-    const mateTypeName = mateType.find((type) => type.cateId === cateId)?.name; // 해당 cateId의 mateType 이름 찾기
+    const mateTypeName = mateType.find((type) => type.cateId === cateId)?.name;
     const restaurant = await Restaurant.findOne({
       _id: rtId,
       "category.mateType": mateTypeName,
@@ -55,6 +64,7 @@ restaurantRouter.get("/:cateId/:rtId", async (req, res) => {
     res.status(500).send({ error: e.message });
   }
 });
+
 restaurantRouter.post("/:cateId/:rtId/view", async (req, res) => {
   try {
     const { rtId } = req.params;
@@ -84,7 +94,7 @@ restaurantRouter.post("/location", async (req, res) => {
             coordinates: [parseFloat(lon), parseFloat(lat)], // 경도, 위도 순서
           },
           distanceField: "distance",
-          maxDistance: 2000, // 최대 거리 (미터 단위, 여기서는 2km) 2000
+          maxDistance: 2000, // 최대 거리 (미터 단위, 여기서는 2km)
           spherical: true,
         },
       },
@@ -96,23 +106,59 @@ restaurantRouter.post("/location", async (req, res) => {
     return res.status(500).json({ error: "데이터 조회 중 오류 발생" });
   }
 });
+
 restaurantRouter.get("/", async (req, res) => {
   try {
+    console.log("Received request with query params:", req.query);
     const latitude = parseFloat(req.query.latitude);
     const longitude = parseFloat(req.query.longitude);
-    const restaurant = await Restaurant.find({
-      location: {
-        $near: {
-          $geometry: {
+    const search = req.query.search;
+    const limit = req.query.limit ? Number(req.query.limit) : 10;
+    const skip = req.query.skip ? Number(req.query.skip) : 0;
+
+    if (isNaN(latitude) || isNaN(longitude)) {
+      return res.status(400).send({ error: "Invalid latitude or longitude" });
+    }
+
+    const match = {};
+
+    if (search) {
+      if (search.startsWith("#")) {
+        // 해시태그 검색
+        match["reviews.tags.name"] = search.slice(1);
+      } else {
+        // 일반 검색
+        match["name"] = { $regex: search, $options: "i" };
+      }
+    }
+
+    const restaurants = await Restaurant.aggregate([
+      {
+        $geoNear: {
+          near: {
             type: "Point",
             coordinates: [longitude, latitude],
           },
+          distanceField: "distance",
+          maxDistance: 2000, // 2km
+          spherical: true,
         },
       },
-    });
-    res.status(200).send({ restaurant });
+      { $match: match },
+      { $skip: skip },
+      { $limit: limit },
+    ]);
+
+    const restaurantsTotal = await Restaurant.countDocuments(match);
+    const hasMore = skip + limit < restaurantsTotal;
+
+    res.status(200).send({ restaurant: restaurants, hasMore });
   } catch (e) {
+    console.error("Error fetching restaurants:", e);
     res.status(500).send({ error: e.message });
   }
 });
+
+
+
 module.exports = restaurantRouter;
