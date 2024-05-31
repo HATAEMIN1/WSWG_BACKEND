@@ -1,11 +1,10 @@
-const { mongoose, Types } = require("mongoose");
+const mongoose = require("mongoose");
+const { Schema } = mongoose;
 
-const TagSchema = mongoose.Schema({
-  name: [{ type: String }],
-  review: {
-    type: Types.ObjectId,
-    ref: "Review",
-  },
+const tagSchema = new Schema({
+  name: { type: String, required: true, unique: true },
 });
-const Tag = mongoose.model("tag", TagSchema);
+
+const Tag = mongoose.model("Tag", tagSchema);
+
 module.exports = Tag;
