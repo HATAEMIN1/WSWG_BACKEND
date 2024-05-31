@@ -2,26 +2,55 @@ const express = require("express");
 const { default: mongoose } = require("mongoose");
 const reviewRouter = express.Router();
 const User = require("../models/User");
-// const Review = require("../models/Review");
 const Restaurant = require("../models/Restaurant");
 const Review = require("../models/Review");
-// const Tag = require("../models/Tag");
+const Tag = require("../models/Tag");
 const { upload } = require("../middlewares/imageUpload");
 
-//post먼저
+// 리뷰 생성 라우터
 reviewRouter.post("/", async (req, res) => {
   try {
-    const { userId, restId } = req.body;
-    console.log(req.body);
-    const user = await User.findById(userId);
-    const restaurant = await Restaurant.findById(restId);
+    const { userId, restId, content, images, rating, tags } = req.body;
 
-    const review = await new Review({
-      ...req.body,
-      user: user,
-      restaurant: restaurant,
+    // 요청 데이터 로그
+    console.log("Request body:", req.body);
+
+    // 필수 필드 검증
+    if (!userId || !restId || !content || !rating) {
+      return res.status(400).send({ error: "Missing required fields" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).send({ error: "User not found" });
+    }
+
+    const restaurant = await Restaurant.findById(restId);
+    if (!restaurant) {
+      return res.status(404).send({ error: "Restaurant not found" });
+    }
+
+    const review = new Review({
+      user: user._id,
+      restaurant: restaurant._id,
+      content: content,
+      images: images,
+      rating: rating,
       createdAt: new Date(),
-    }).save();
+    });
+
+    if (tags && tags.length > 0) {
+      for (let tagName of tags) {
+        let tag = await Tag.findOne({ name: tagName });
+        if (!tag) {
+          tag = new Tag({ name: tagName });
+          await tag.save();
+        }
+        review.tags.push(tag._id);
+      }
+    }
+
+    await review.save();
     return res.status(200).send({ review });
   } catch (error) {
     console.log(error);
@@ -43,6 +72,56 @@ reviewRouter.post("/image", upload.single("image"), async (req, res) => {
     console.log(error.message);
   }
 });
+// 해시태그 추가 라우터
+reviewRouter.post("/tags", async (req, res) => {
+  try {
+    const { name } = req.body;
+    let tag = await Tag.findOne({ name });
+    if (!tag) {
+      tag = new Tag({ name });
+      await tag.save();
+      return res.status(201).send({ tag });
+    } else {
+      return res.status(400).send({ message: "Tag already exists" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: error.message });
+  }
+});
+
+// 해시태그 조회 라우터
+reviewRouter.get("/tags", async (req, res) => {
+  try {
+    const tags = await Tag.find();
+    res.json(tags);
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
+});
+
+reviewRouter.get("/search", async (req, res) => {
+  try {
+    const { tag } = req.query;
+    if (!tag) {
+      return res.status(400).send({ error: "Tag query parameter is required" });
+    }
+
+    const tagDoc = await Tag.findOne({ name: tag });
+    if (!tagDoc) {
+      return res.status(404).send({ error: "Tag not found" });
+    }
+
+    const reviews = await Review.find({ tags: tagDoc._id })
+      .populate("user", "name")
+      .populate("tags");
+
+    return res.status(200).send({ reviews });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: error.message });
+  }
+});
 //--------------------------------------------------------->
 
 //리뷰 리스트
@@ -55,6 +134,7 @@ reviewRouter.get("/:rtId", async (req, res) => {
     const skip = req.query.skip ? Number(req.query.skip) : 0;
     const review = await Review.find({ restaurant: rtId })
       .populate("user", "name")
+      .populate("tags")
       .limit(limit)
       .skip(skip)
       .sort({ createdAt: -1 });
@@ -77,10 +157,12 @@ reviewRouter.get("/:rpId/view", async (req, res) => {
     if (!mongoose.isValidObjectId(rpId))
       res.status(400).send({ message: "not rpId" });
 
-    const review = await Review.findById({ _id: rpId }).populate({
-      path: "user",
-      select: "name",
-    });
+    const review = await Review.findById({ _id: rpId })
+      .populate({
+        path: "user",
+        select: "name",
+      })
+      .populate("tags");
     if (!review) {
       return res.status(404).send({ message: "Review not find" });
     }
@@ -95,7 +177,9 @@ reviewRouter.get("/:rpId/view", async (req, res) => {
 reviewRouter.get("/user/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
-    const reviews = await Review.find({ user: userId }).populate("restaurant", "name");
+    const reviews = await Review.find({ user: userId })
+      .populate("restaurant", "name")
+      .populate("tags");
     if (!reviews) {
       return res.status(404).send({ message: "Reviews not found" });
     }
@@ -105,7 +189,6 @@ reviewRouter.get("/user/:userId", async (req, res) => {
     res.status(500).send({ error: error.message });
   }
 });
-
 
 //리뷰 뷰 삭제
 reviewRouter.delete("/:rpId", async (req, res) => {

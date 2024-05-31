@@ -97,7 +97,7 @@ restaurantRouter.post("/location", async (req, res) => {
             coordinates: [parseFloat(lon), parseFloat(lat)], // 경도, 위도 순서
           },
           distanceField: "distance",
-          maxDistance: 2000, // 최대 거리 (미터 단위, 여기서는 2km) 2000
+          maxDistance: 1500, // 최대 거리 (미터 단위, 여기서는 2km) 2000
           spherical: true,
         },
       },
@@ -131,4 +131,5 @@ restaurantRouter.get("/", async (req, res) => {
     res.status(500).send({ error: e.message });
   }
 });
+
 module.exports = restaurantRouter;
