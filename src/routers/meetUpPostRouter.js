@@ -45,6 +45,48 @@ meetUpPostRouter.get("/", async (req, res) => {
         select: "email name",
       });
 
+    //내가작성한게시물가져오기
+    meetUpPostRouter.get("/user/:userId", async (req, res) => {
+      const { userId } = req.params;
+      const limit = req.query.limit ? Number(req.query.limit) : 5;
+      const skip = req.query.skip ? Number(req.query.skip) : 0;
+
+      try {
+        if (!mongoose.isValidObjectId(userId)) {
+          return res.status(400).send({ err: "Invalid userId" });
+        }
+
+        const meetUpPosts = await MeetUpPost.find({ user: userId })
+          .sort({ createdAt: -1 })
+          .limit(limit)
+          .skip(skip)
+          .populate({
+            path: "user",
+            select: "email name",
+          });
+
+        // 각 게시물의 댓글 수를 계산합니다.
+        const postsWithCommentCounts = await Promise.all(
+          meetUpPosts.map(async (post) => {
+            const commentCount = await MeetUpPostComment.countDocuments({
+              meetUpPost: post._id,
+            });
+            return { ...post._doc, commentCount };
+          })
+        );
+
+        const meetUpPostTotal = await MeetUpPost.countDocuments({
+          user: userId,
+        });
+        const hasMore = skip + limit < meetUpPostTotal;
+        return res
+          .status(200)
+          .send({ meetUpPost: postsWithCommentCounts, hasMore });
+      } catch (error) {
+        res.status(500).send({ error: error.message });
+      }
+    });
+
     // 각 게시물의 댓글 수를 계산합니다.
     const postsWithCommentCounts = await Promise.all(
       meetUpPosts.map(async (post) => {
