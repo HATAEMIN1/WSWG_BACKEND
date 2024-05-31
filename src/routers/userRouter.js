@@ -1,7 +1,8 @@
 const express = require("express");
 const { mongoose } = require("mongoose");
 const User = require("../models/User");
-const Restaurant = require("../models/Restaurant");
+// const Restaurant = require("../models/Restaurant");
+const MeetUpPost = require("../models/MeetUpPost.js");
 const Like = require("../models/Like");
 const userRouter = express.Router();
 const { upload } = require("../middlewares/imageUpload.js");
@@ -302,8 +303,11 @@ userRouter.get("/:userId/likedResturants", async (req, res) => {
     const { userId } = req.params;
     if (!mongoose.isValidObjectId(userId))
       res.status(400).send({ error: "not a valid userId" });
-    const likes = await Like.find({ user: userId });
-    return res.status(200).send({ likes });
+    const likes = await Like.find({ user: userId, liked: true }).populate(
+      "restaurant"
+    );
+    const restaurants = likes.map((like) => like.restaurant);
+    return res.status(200).send({ restaurants });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error });
@@ -311,8 +315,36 @@ userRouter.get("/:userId/likedResturants", async (req, res) => {
 });
 
 // 내가 작성한 리뷰
+// userRouter.get("/user/:userId", async (req, res) => {
+//   try {
+//     const { userId } = req.params;
+//     const reviews = await Review.find({ user: userId })
+//       .populate("restaurant", "name") // 리뷰와 관련된 식당 정보 가져오기
+//       .sort({ createdAt: -1 }); // 작성일자를 내림차순으로 정렬
+
+//     if (!reviews.length) {
+//       return res.status(404).send({ message: "작성한 리뷰가 없습니다" });
+//     }
+//     return res.status(200).send({ reviews });
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).send({ error: error.message });
+//   }
+// });
 
 // 내가 등록한 우리 만날까
+userRouter.get("/:userId/meetups", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (!mongoose.isValidObjectId(userId))
+      res.status(400).send({ error: "not a valid userId" });
+    const meetupPosts = await MeetUpPost.find({ user: userId });
+    return res.status(200).send({ meetupPosts });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error });
+  }
+});
 
 userRouter.delete("/:userId", async function (req, res) {
   try {
@@ -369,7 +401,7 @@ userRouter.put(
           { new: true }
         );
         console.log("user with updated password and image:", user);
-        return res.send({ user });
+        return res.send({ user, passwordChange: true });
       } else if (!req.file && req.body.password) {
         const hashedPassword = await hash(req.body.password, 10);
         const user = await User.findByIdAndUpdate(
@@ -380,7 +412,7 @@ userRouter.put(
           { new: true }
         );
         console.log("user with updated password:", user);
-        return res.send({ user });
+        return res.send({ user, passwordChange: true });
       } else if (req.file && !req.body.password) {
         const { filename, originalname } = req.file;
         const image = { filename, originalname };
@@ -392,7 +424,7 @@ userRouter.put(
           { new: true }
         );
         console.log("user with updated image:", user);
-        return res.send({ user });
+        return res.send({ user, passwordChange: false });
       }
     } catch (error) {
       return res.status(500).send({ error: error.message });

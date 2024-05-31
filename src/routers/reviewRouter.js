@@ -45,33 +45,6 @@ reviewRouter.post("/image", upload.single("image"), async (req, res) => {
 });
 //--------------------------------------------------------->
 
-//해시태그-------------------------------------------------->
-// reviewRouter.post("/hashtags", async (req, res) => {
-//   try {
-//     const { hashtags } = req.body;
-
-//     const tag = await new Tag({ name: hashtags }).save();
-//     return res.status(200).send({ tag });
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).send({ error: error.message });
-//   }
-// });
-
-// reviewRouter.get("/review-posts/:rpId/hashtags", async (req, res) => {
-//   try {
-//     const { rpId } = req.params;
-//     const tag = await Tag.find({});
-//     if (!mongoose.isValidObjectId(hashtagId))
-//       res.status(400).send({ message: "not hashtagId" });
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).send({ error: error.message });
-//   }
-// });
-
-//--------------------------------------------------------->
-
 //리뷰 리스트
 reviewRouter.get("/:rtId", async (req, res) => {
   // reviewRouter.get("/restaurant/:restId", async (req, res) => {
@@ -149,5 +122,7 @@ reviewRouter.delete("/:rpId", async (req, res) => {
     return res.status(500).send({ error: error.message });
   }
 });
+
+//리뷰 이미지데이터 삭제
 
 module.exports = reviewRouter;
