@@ -37,9 +37,6 @@ likeRouter.get("/user/:userId", async (req, res) => {
     const likes = await Like.find({ user: userId, liked: true }).populate(
       "restaurant"
     );
-
-    // console.log("내가최보람이다" + tempData.restaurant);
-
     //좋아요 정보에서 레스토랑 세부사항 추출
     const likedRestaurants = likes.map((like) => like.restaurant);
 

@@ -11,14 +11,17 @@ const mateType = [
   { no: 6, cateId: "self", name: "혼밥" },
 ];
 
+const validCateIds = mateType.map((type) => type.cateId);
 restaurantRouter.get("/:cateId", async (req, res) => {
   try {
     const { cateId } = req.params;
+    if (!validCateIds.includes(cateId)) {
+      return res.status(400).send({ error: "Invalid cateId parameter" });
+    }
     const mateTypeName = mateType.find((type) => type.cateId === cateId)?.name; // 해당 cateId의 mateType 이름 찾기
     const limit = req.query.limit ? Number(req.query.limit) : 0;
     const skip = req.query.skip ? Number(req.query.skip) : 0;
     const { search, filters, foodtype } = req.query;
-    console.log(foodtype);
     const findArgs = {
       "category.mateType": mateTypeName,
       "category.foodType": foodtype,
@@ -45,6 +48,9 @@ restaurantRouter.get("/:cateId", async (req, res) => {
 restaurantRouter.get("/:cateId/:rtId", async (req, res) => {
   try {
     const { rtId, cateId } = req.params;
+    if (!validCateIds.includes(cateId)) {
+      return res.status(400).send({ error: "Invalid cateId parameter" });
+    }
     const mateTypeName = mateType.find((type) => type.cateId === cateId)?.name; // 해당 cateId의 mateType 이름 찾기
     const restaurant = await Restaurant.findOne({
       _id: rtId,
@@ -57,7 +63,10 @@ restaurantRouter.get("/:cateId/:rtId", async (req, res) => {
 });
 restaurantRouter.post("/:cateId/:rtId/view", async (req, res) => {
   try {
-    const { rtId } = req.params;
+    const { cateId, rtId } = req.params;
+    if (!validCateIds.includes(cateId)) {
+      return res.status(400).send({ error: "Invalid cateId parameter" });
+    }
     const restaurant = await Restaurant.findById(rtId);
     restaurant.views++;
     await restaurant.save();
@@ -70,6 +79,9 @@ restaurantRouter.post("/:cateId/:rtId/view", async (req, res) => {
 restaurantRouter.post("/location", async (req, res) => {
   try {
     const { lat, lon, cateId } = req.body;
+    if (!validCateIds.includes(cateId)) {
+      return res.status(400).send({ error: "Invalid cateId parameter" });
+    }
     const mateTypeName = mateType.find((type) => type.cateId === cateId)?.name;
     const { filters } = req.query;
     const findArgs = {};
@@ -87,7 +99,6 @@ restaurantRouter.post("/location", async (req, res) => {
         findArgs["address.district"] = filters.district;
       }
     }
-    console.log(findArgs);
     // 현재 위치에서 2km 이내의 레스토랑 데이터 조회
     const restaurant = await Restaurant.aggregate([
       {
