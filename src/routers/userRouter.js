@@ -131,8 +131,8 @@ userRouter.post("/naver-login", async (req, res) => {
       userDataResponse.data.response
     );
     const userData = userDataResponse.data.response;
-
-    const username = userData.nickname;
+    // const username = userData.nickname;
+    const username = userData.name;
     const profilePic = userData.profile_image;
     const email = userData.email;
     const password = await hash(email, 10);
@@ -168,6 +168,7 @@ userRouter.post("/naver-login", async (req, res) => {
       res.status(200).send({ newUser, message: "회원가입 성공" });
     }
   } catch (error) {
+    console.log(error.message);
     res.status(500).send({ error });
   }
 });
